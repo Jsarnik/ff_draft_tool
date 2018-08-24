@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
-var Logger = require('./logger');
+var Logger = require('./Logger');
 var csv = require("fast-csv");
 var playersService = require('./mongo/PlayersService');
 var picksService = require('./mongo/PicksService');

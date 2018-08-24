@@ -5,7 +5,7 @@ var timeout = require('connect-timeout');
 var mongoConfig = require('./mongo/MongoConfig');
 var routes = require('./api/routes');
 var cors = require('cors');
-var Logger = require('./logger');
+var Logger = require('./Logger');
 var app = express();
 
 mongoConfig.MongoConfiguration.Initialize();

@@ -3,7 +3,7 @@
   "description": "Fantasy Football Draft Tool",
   "main": "server.js",
   "engines": {
-    "node": "8.11.3"
+    "node": "9.11.3"
   },
   "scripts": {
     "start": "NODE_ENV=localhost node server.js",
