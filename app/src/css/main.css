@@ -1,0 +1,185 @@
+html {
+  height: auto;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  margin: 0; }
+
+body {
+  background: #fff;
+  color: #000;
+  font-family: 'Times New Roman', Times, serif;
+  height: 100%; }
+
+a, a:hover, a:active, a:visited {
+  color: #000; }
+
+.main-container {
+  width: 100%; }
+
+.flex-container {
+  position: relative;
+  display: flex;
+  text-align: left;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-around;
+  align-items: baseline;
+  padding: 5px; }
+  .flex-container .flex-item {
+    flex: 1;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: auto;
+    position: relative;
+    width: 100%;
+    padding: 2px; }
+    .flex-container .flex-item.half {
+      flex-basis: 50%; }
+    .flex-container .flex-item.title {
+      font-weight: bold;
+      background: #ccc; }
+    .flex-container .flex-item.center {
+      text-align: center; }
+
+.drafted {
+  opacity: .6; }
+  .drafted div.button {
+    border-color: red;
+    color: red;
+    cursor: default; }
+    .drafted div.button:hover {
+      border-color: red;
+      color: red; }
+
+div.button {
+  border: 1px solid;
+  padding: 2px;
+  border-radius: 3px;
+  text-align: center;
+  width: auto;
+  margin: 0 auto;
+  cursor: pointer;
+  width: 50%; }
+  div.button.reset {
+    border: 1px solid red;
+    margin-top: 100px; }
+  div.button.download {
+    margin-top: 100px;
+    border: 1px solid green; }
+  div.button.draft {
+    text-align: center;
+    border-color: green;
+    color: green; }
+    div.button.draft:hover {
+      background: green;
+      color: #fff; }
+
+.player-pickboard, .team-pickboard {
+  position: relative; }
+
+.team-pickboard {
+  padding: 2px;
+  background: #ccc;
+  border-bottom: 10px solid #000; }
+  .team-pickboard .flex-container {
+    padding: 0; }
+  .team-pickboard .header-row {
+    width: 100%;
+    z-index: 10;
+    top: 0;
+    background: #fff;
+    box-shadow: 0px 0px 1px 1px #333; }
+    .team-pickboard .header-row .flex-item {
+      height: 20px;
+      font-size: .8em;
+      color: #fff;
+      background: #333;
+      line-height: 1.6em; }
+  .team-pickboard .flex-item {
+    background: #fff;
+    padding: 10px;
+    margin: 2px;
+    border: 5px solid transparent;
+    display: inline-block;
+    opacity: .6;
+    font-size: .7em;
+    text-align: center; }
+    .team-pickboard .flex-item.rb {
+      background-color: rgba(25, 0, 255, 0.664);
+      box-shadow: inset 1px 0px 10px 5px #1900ff;
+      border-color: #1900ff;
+      color: #fff; }
+    .team-pickboard .flex-item.wr {
+      background-color: rgba(0, 247, 255, 0.616);
+      box-shadow: inset 1px 0px 10px 5px #00f7ff;
+      border-color: #00f7ff;
+      color: #000; }
+    .team-pickboard .flex-item.k {
+      background-color: rgba(255, 0, 234, 0.692);
+      box-shadow: inset 1px 0px 10px 5px #ff00ea;
+      border-color: #ff00ea;
+      color: #000; }
+    .team-pickboard .flex-item.dst {
+      background-color: rgba(43, 117, 0, 0.658);
+      box-shadow: inset 1px 0px 10px 5px #2b7500;
+      border-color: #2b7500;
+      color: #fff; }
+    .team-pickboard .flex-item.qb {
+      background-color: rgba(250, 205, 3, 0.616);
+      box-shadow: inset 1px 0px 10px 5px #facd03;
+      border-color: #facd03;
+      color: #000; }
+    .team-pickboard .flex-item.te {
+      background-color: rgba(255, 115, 0, 0.651);
+      box-shadow: inset 1px 0px 10px 5px #ff7300;
+      border-color: #ff7300;
+      color: #fff; }
+    .team-pickboard .flex-item.no-cursor {
+      cursor: default; }
+      .team-pickboard .flex-item.no-cursor:hover {
+        opacity: 1; }
+    .team-pickboard .flex-item.selectable {
+      cursor: pointer; }
+      .team-pickboard .flex-item.selectable:hover {
+        border: 5px dashed #888888; }
+    .team-pickboard .flex-item.selected {
+      opacity: 1;
+      border: 5px dashed #000; }
+      .team-pickboard .flex-item.selected:hover {
+        opacity: 1;
+        border: 5px dashed #000; }
+
+.header-row .current-pick {
+  background: red; }
+  .header-row .current-pick .flex-item {
+    font-size: 2em;
+    text-align: center;
+    line-height: .6em; }
+
+.filters {
+  padding: 20px;
+  background: #b8b8b8; }
+
+.fixed {
+  padding: 0;
+  position: fixed;
+  width: 100%;
+  z-index: 10;
+  background: #fff;
+  box-shadow: 0px 0px 1px 1px #333; }
+  .fixed.top {
+    top: 170px; }
+
+.header-bar {
+  width: 100%;
+  display: inline-block;
+  position: relative;
+  text-align: center;
+  box-shadow: 0px 0px 1px 2px #333;
+  margin-bottom: 10px; }
+  .header-bar .header-links {
+    width: 25%;
+    float: left; }
+
+/*# sourceMappingURL=main.css.map */

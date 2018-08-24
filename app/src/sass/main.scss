@@ -1,0 +1,275 @@
+
+$rb: rgb(25, 0, 255);
+$rb_bg: rgba(25, 0, 255, 0.664);
+
+$wr: rgb(0, 247, 255);
+$wr_bg: rgba(0, 247, 255, 0.616);
+
+$qb: rgb(250, 205, 3);
+$qb_bg: rgba(250, 205, 3, 0.616);
+
+$dst: rgb(43, 117, 0);
+$dst_bg: rgba(43, 117, 0, 0.658);
+
+$k: rgb(255, 0, 234);
+$k_bg: rgba(255, 0, 234, 0.692);
+
+$te: rgb(255, 115, 0);
+$te_bg: rgba(255, 115, 0, 0.651);
+
+html {
+    height: auto;
+    width: 100%;
+    border: 0;
+    padding: 0;
+    margin: 0
+}
+
+body{
+    background: #fff;
+    color: #000;
+    font-family: 'Times New Roman', Times, serif;
+    height:100%;
+}
+
+a, a:hover, a:active, a:visited{
+    color: #000;
+}
+
+.main-container{
+    width: 100%;
+}
+
+.flex-container {
+    position: relative;
+    display: flex;
+    text-align: left;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: baseline;
+    padding: 5px;
+
+    .flex-item{
+        flex: 1;
+        flex-grow: 1;
+        flex-shrink: 1;
+        flex-basis: auto;
+        position: relative;
+        width: 100%;
+        padding: 2px;
+
+        &.half{
+            flex-basis: 50%;
+        }
+
+        &.title{
+            font-weight: bold;
+            background: #ccc;
+        }
+
+        &.center{
+            text-align: center;
+        }
+    }
+}
+
+.draft-tool{
+   
+}
+
+.drafted{
+    opacity: .6;
+
+    div.button{
+        border-color: red;
+        color: red;
+        cursor: default;
+
+        &:hover{
+            border-color: red;
+            color: red;    
+        }
+    }
+}
+
+div.button{
+    border:1px solid;
+    padding: 2px;
+    border-radius: 3px;
+    text-align: center;
+    width: auto;
+    margin: 0 auto;
+    cursor: pointer;
+    width: 50%;
+
+    &.reset{
+        border: 1px solid red;
+        margin-top: 100px;
+    }
+    
+    &.download{
+        margin-top: 100px;
+        border: 1px solid green;
+    }
+
+    &.draft{
+        text-align: center;
+        border-color: green;
+        color: green;
+
+        &:hover{
+            background: green;
+            color:#fff;
+        }
+    }
+}
+
+.player-pickboard, .team-pickboard{
+    position: relative;
+}
+
+.team-pickboard{
+    padding: 2px;
+    background: #ccc;
+    border-bottom: 10px solid #000;
+
+    .flex-container{
+        padding: 0;
+    }
+
+    .header-row{
+        width:100%;
+        z-index: 10;
+        top: 0;
+        background: #fff;
+        box-shadow: 0px 0px 1px 1px #333;
+
+        .flex-item{
+           height: 20px;
+           font-size: .8em;
+           color: #fff;
+           background: #333;
+           line-height: 1.6em; 
+        }
+    }
+
+    .flex-item{
+        background: #fff;
+        padding: 10px;
+        margin: 2px;
+        border: 5px solid transparent;
+        display: inline-block;
+        opacity: .6;
+        font-size: .7em;
+        text-align: center;
+
+        &.rb{
+            background-color: $rb_bg;
+            box-shadow: inset 1px 0px 10px 5px $rb;
+            border-color: $rb;
+            color: #fff;
+        }
+        &.wr{
+            background-color: $wr_bg;
+            box-shadow: inset 1px 0px 10px 5px $wr;
+            border-color: $wr;
+            color: #000;
+        }
+        &.k{
+            background-color: $k_bg;
+            box-shadow: inset 1px 0px 10px 5px $k;
+            border-color: $k;
+            color: #000;
+        }
+        &.dst{
+            background-color: $dst_bg;
+            box-shadow: inset 1px 0px 10px 5px $dst;
+            border-color: $dst;
+            color: #fff;
+        }
+        &.qb{
+            background-color: $qb_bg;
+            box-shadow: inset 1px 0px 10px 5px $qb;
+            border-color: $qb;
+            color: #000;
+        }
+        &.te{
+            background-color: $te_bg;
+            box-shadow: inset 1px 0px 10px 5px $te;
+            border-color: $te;
+            color: #fff;
+        }
+
+        &.no-cursor{
+            cursor: default;
+            &:hover{
+                opacity: 1;
+            }
+        }
+
+        &.selectable{
+            cursor: pointer;
+
+            &:hover{
+                border: 5px dashed rgb(136, 136, 136);
+            }
+        }
+
+        &.selected{
+            opacity: 1;
+            border: 5px dashed #000;
+
+            &:hover{
+                opacity: 1;
+                border: 5px dashed #000;
+            }
+        }
+    }
+    
+}
+
+.header-row{
+
+    .current-pick{
+        background: red;
+
+        .flex-item{
+            font-size: 2em;
+            text-align: center;
+            line-height: .6em;
+        }
+    }
+}
+
+.filters{
+    padding:20px;
+    background: rgb(184, 184, 184);
+}
+
+.fixed{
+    padding: 0;
+    position: fixed;
+    width: 100%;
+    z-index: 10;
+    background: #fff;
+    box-shadow: 0px 0px 1px 1px #333;
+
+    &.top{
+        top: 170px;
+    }
+}
+
+.header-bar{
+    width: 100%;
+    display: inline-block;
+    position: relative;
+    text-align: center;
+    box-shadow: 0px 0px 1px 2px #333;
+    margin-bottom:10px;
+
+    .header-links{
+        width: 25%;
+        float: left;
+    }
+}

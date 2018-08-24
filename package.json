@@ -1,0 +1,36 @@
+{
+  "name": "DraftTool",
+  "description": "Fantasy Football Draft Tool",
+  "main": "server.js",
+  "engines": {
+    "node": "8.11.3"
+  },
+  "scripts": {
+    "start": "NODE_ENV=localhost node server.js",
+    "profile": "NODE_ENV=localhost node --prof server.js",
+    "build": "npm install grunt build NODE_ENV=production forever server.js"
+  },
+  "dependencies": {
+    "async": "^2.6.0",
+    "body-parser": "^1.17.1",
+    "connect-timeout": "^1.8.0",
+    "cors": "^2.8.4",
+    "ejs": "^2.4.1",
+    "express": "^4.16.2",
+    "express-session": "^1.13.0",
+    "fast-csv": "^2.4.1",
+    "handlebars": "^4.0.11",
+    "jquery": "^3.2.1",
+    "lodash": "^4.17.4",
+    "moment": "^2.22.2",
+    "mongoose": "^4.13.9",
+    "node-cache": "^4.1.1",
+    "passport": "^0.3.2",
+    "passport-http": "^0.3.0",
+    "passport-http-bearer": "^1.0.1",
+    "request": "^2.83.0",
+    "utf8": "^3.0.0",
+    "winston": "^3.0.0"
+  },
+  "devDependencies": {}
+}
