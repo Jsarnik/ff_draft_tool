@@ -10,8 +10,8 @@ class PlayersSchemaService{
         });
     }
 
-    GetAll(nextFn){
-        Player.find({}, function(err, players) {
+    GetAll(_league, nextFn){
+        Player.find({league: _league}, function(err, players) {
             if(err){
                 return nextFn(err);  
             }

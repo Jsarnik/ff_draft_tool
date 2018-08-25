@@ -10,16 +10,16 @@ var async = require('async');
 
 class InportService{
 
-    UploadFile(doneFn){
+    UploadFile(_league, doneFn){
         const filePath = path.join(__dirname, 'data', 'FantasyPros_2018_Draft_Overall_Rankings.csv');
-        this.ImportPlayersDraftData(filePath, doneFn);
+        this.ImportPlayersDraftData(filePath, _league, doneFn);
     }
 
     DeleteFile(){
 
     }
 
-    ImportPlayersDraftData(filePath, doneFn){
+    ImportPlayersDraftData(filePath,_league, doneFn){
         playersService.PlayersSchemaService.DeleteAll((err, res)=>{
             if(err){
                 Logger.NodeLogger.log({
@@ -34,6 +34,7 @@ class InportService{
             csv.fromPath(filePath).on("data", function(row){
                 if(index !== 0){
                     let playerObject = {
+                        league: _league,
                         rank: row[0],
                         name: row[2],
                         team: !row[3] || row[3] == '' ? validate(row[2]) : row[3],

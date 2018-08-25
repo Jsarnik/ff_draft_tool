@@ -6,7 +6,14 @@ class FileUpload extends Component {
 
     constructor(props) {
       super(props);
+        if(!props.match.params.league){
+          this.props.history.push('/');
+        }
+
+        props.onLeagueSetFn(props.match.params.league);
+
         this.state = {
+          league: props.match.params.league,
           uploadStatus: false,
           db_status: null,
           download_status: null
@@ -45,9 +52,11 @@ class FileUpload extends Component {
     }
 
     resetDB=()=>{
-      let baseAPIURI = config.baseApiUri;
+      let options = {
+        leagueName: this.state.league
+      }
 
-      axios.get(`${config.baseApiUri}/api/resetDB`)
+      axios.post(`${config.baseApiUri}/api/resetDB`, options)
       .then(res => {
         this.setState({
           db_status: res.data.data.success

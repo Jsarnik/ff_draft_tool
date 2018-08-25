@@ -9,7 +9,14 @@ class DraftTool extends Component {
 
     constructor(props) {
       super(props);
+        if(!props.match.params.league){
+          this.props.history.push('/');
+        }
+
+        props.onLeagueSetFn(props.match.params.league);
+
         this.state = {
+          league: props.match.params.league,
           teams: [],
           players:[],
           showDrafted: false,
@@ -56,11 +63,14 @@ class DraftTool extends Component {
     componentDidMount = () =>{
       let teamsUrl = `${config.baseApiUri}/api/getTeams`;
       let playersUrl = `${config.baseApiUri}/api/getPlayers`;
+      let options = {
+        league: this.state.league
+      }
 
-      axios.get(teamsUrl)
+      axios.post(teamsUrl, options)
       .then(teamsRes => {
         let teamData = teamsRes.data.data;
-        axios.get(playersUrl)
+        axios.post(playersUrl, options)
         .then(playersRes =>{
           let playerData = playersRes.data.data;
  
@@ -104,10 +114,12 @@ class DraftTool extends Component {
 
     handleDraftClick = (player) =>{
       if(!this.state.currentPick) return;
+
       player.isDrafted = true;
       player.draftedByUser = this.state.currentPick.team;
       player.roundDrafted = this.state.currentPick.roundNo;
-      player.overall = this.state.currentPick.overall
+      player.overall = this.state.currentPick.overall;
+
 
       let teamPicks = this.state.teams[this.state.currentPick.team].picks;
       let _r = `round_${this.state.currentPick.roundNo}`;
@@ -171,6 +183,13 @@ class DraftTool extends Component {
       });
     }
 
+    handleUndraftCheck = (player) =>{
+      player.isMarkedForDelete = !player.isMarkedForDelete;
+      this.setState({
+        players: {...this.state.players, [player.id]: player}
+      });
+    }
+
     draftButton = (player) =>{
       if(!player.isDrafted && this.state.currentPick && this.state.teams[this.state.currentPick.team].picks
         && this.state.teams[this.state.currentPick.team].picks[`round_${this.state.currentPick.roundNo}`]){
@@ -184,9 +203,23 @@ class DraftTool extends Component {
           <div className="button draft" onClick={() => this.handleDraftClick(player)}>Draft</div>
         )
       }else{
-        return (
-          <div className="button disabled" onClick={() => this.handleUndraftClick(player)}>Owned (Remove)</div>
-        )
+        if(player.isMarkedForDelete){
+          return (
+            <div>
+              <div className="button disabled" onClick={() => this.handleUndraftClick(player)}>Remove</div>
+              <div>&nbsp;</div>
+              <div className="button draft" onClick={() => this.handleUndraftCheck(player)}>Cancel</div>
+            </div>
+          )
+        }else{
+          return (
+            <div>
+              <div className="button">Owned</div>
+              <label> (Check to Initiate Undo) </label>
+              <input type="checkbox" value={player.isMarkedForDelete} onClick={(e)=>{this.handleUndraftCheck(player)}}/>
+            </div>
+          )
+        }
       }
     }
 
@@ -370,7 +403,7 @@ class DraftTool extends Component {
                     <input type="text" value={this.state.filters.playerName} onChange={(e)=> this.filterPlayerName(e)}/>
                   </div>
                   <div className="drafted-players flex-item">
-                    <input type="checkbox" value={this.setState.showDrafted} onClick={(e)=>{this.handleCheck()}}/>
+                    <input type="checkbox" value={this.state.showDrafted} onClick={(e)=>{this.handleCheck()}}/>
                   </div>
               </div>
             </div>

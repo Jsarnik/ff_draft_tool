@@ -7,46 +7,48 @@ class Teams extends Component {
     super(props);
    
   }
-    handleClick = (key, team, isEdit) =>{
-        this.props.editTeamFn(key, team, isEdit);
+    handleClick = (key, team, isEdit, isDelete) =>{
+        this.props.editTeamFn(key, team, isEdit, isDelete);
     }
 
     enterTeams = () => {
       return _.map(this.props.teams, (team, key)=>{
+        let sortKey = parseInt(team.draftPos, 10);
         if(!team.name || team.isEditable){     
           return (
-            <div className="flex-container" key={key}>
-            <div className="flex-item">
-                <Input type="text" onChangeFn={this.props.handleChangeFn} value={team.displayName} params={{prop1: key, prop2:"displayName"}} />
-              </div>
+            <div className="flex-container" key={key} sortkey={sortKey}>
               <div className="flex-item">
-                <Input type="text" onChangeFn={this.props.handleChangeFn} value={team.owner} params={{prop1: key, prop2:"owner"}} />
+                  <Input type="text" onChangeFn={this.props.handleChangeFn} value={team.displayName} params={{prop1: key, prop2:"displayName"}} />
+                </div>
+                <div className="flex-item">
+                  <Input type="text" onChangeFn={this.props.handleChangeFn} value={team.owner} params={{prop1: key, prop2:"owner"}} />
+                </div>
+                <div className="flex-item">
+                  <Input type="number" onChangeFn={this.props.handleChangeFn} value={team.draftPos} params={{prop1: key, prop2:"draftPos"}} />
+                </div>
+                <div className="flex-item">
+                  <div className="button" onClick={()=> this.handleClick(key, team, false)}>Save</div>
+                </div>
               </div>
-              <div className="flex-item">
-                <Input type="number" onChangeFn={this.props.handleChangeFn} value={team.draftPos} params={{prop1: key, prop2:"draftPos"}} />
-              </div>
-              <div className="flex-item">
-                <div className="button" onClick={()=> this.handleClick(key, team, false)}>Save</div>
-              </div>
-            </div>
           )
         }else{
           return (
-            <div className="flex-container">
-              <div className="flex-item">
-                <div>{team.displayName}</div>
+              <div className="flex-container" key={key} sortkey={sortKey}>
+                <div className="flex-item">
+                  <div>{team.displayName}</div>
+                </div>
+                <div className="flex-item">
+                    <div>{team.owner}</div>
+                </div>
+                <div className="flex-item">
+                    <div>{team.draftPos}</div>
+                </div>
+                <div className="flex-item">
+                    <div className="button edit" onClick={()=> this.handleClick(key, team, true)}>Edit</div>
+                    <div className="button delete" onClick={()=> this.handleClick(key, team, false, true)}>Delete</div>
+                </div>
               </div>
-              <div className="flex-item">
-                  <div>{team.owner}</div>
-              </div>
-              <div className="flex-item">
-                  <div>{team.draftPos}</div>
-              </div>
-              <div className="flex-item">
-                  <div className="button edit" onClick={()=> this.handleClick(key, team, true)}>Edit</div>
-              </div>
-            </div>
-          )
+            )
           }
       });
     };

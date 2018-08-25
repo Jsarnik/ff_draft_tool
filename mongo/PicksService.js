@@ -5,9 +5,16 @@ var _ = require('lodash');
 class PicksSchemaService{
     
     Create(pickObject, nextFn){
-        this.SaveSchema(pickObject, (saveErr, savedPickObject) =>{
-            return nextFn(saveErr, savedPickObject);
-        });
+        this.GetOne(pickObject, (getErr, getRes)=>{
+            if(!getRes){
+                this.SaveSchema(pickObject, (saveErr, savedPickObject) =>{
+                    return nextFn(saveErr, savedPickObject);
+                });
+            }else{
+                return nextFn(getErr);
+            }
+        })
+
     }
 
     GetAll(nextFn){
@@ -30,8 +37,15 @@ class PicksSchemaService{
         });
     }
 
-    GetAllByTeam(teamName, nextFn){
-        Pick.find({teamName:teamName}, function(err, picks) {
+    GetOne(pickObject, nextFn){
+        Pick.findOne({league: pickObject.league, teamName: pickObject.teamName}, function(err, pick){
+            let _p = pick ? pick_.doc : null;
+            nextFn(err, _p);
+        });
+    }
+
+    GetAllByTeam(team, nextFn){
+        Pick.find({teamName:team}, function(err, picks) {
             if(err){
                 return nextFn(err);  
             }
@@ -56,7 +70,7 @@ class PicksSchemaService{
     }
 
     Delete(deletePick, nextFn){
-        Pick.remove({playerId: deletePick.playerId}, (err, res)=>{
+        Pick.remove({league: deletePick.league, playerId: deletePick.playerId}, (err, res)=>{
             nextFn(err, res);
         })
     }

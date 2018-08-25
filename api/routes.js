@@ -4,6 +4,7 @@ var express = require('express');
 var playersService = require('../mongo/PlayersService');
 var picksService = require('../mongo/PicksService');
 var teamsService = require('../mongo/TeamsService');
+var leagueService = require('../mongo/LeagueService');
 var importService = require('../ImportService');
 var exportService = require('../ExportService');
 var async = require('async');
@@ -16,13 +17,16 @@ function configure(app) {
     // Routes
     router.post('/upload', uploadFile);
     router.post('/addTeam', addTeam);
+    router.post('/deleteTeam', deleteTeam);
     router.post('/draftPlayer', draftPlayer);
     router.post('/unDraftPlayer', unDraftPlayer);
     router.post('/getTeamRoster', getTeamRoster);
-    router.get('/getTeams', getTeams);
-    router.get('/getPlayers', getPlayers);
-    router.get('/resetDB', resetDB);
-    router.get('/downloadDraft', downloadDraft);
+    router.post('/addLeague', addLeague);
+    router.post('/getLeague', getLeague);
+    router.post('/getTeams', getTeams);
+    router.post('/getPlayers', getPlayers);
+    router.post('/resetDB', resetDB);
+    router.post('/downloadDraft', downloadDraft);
 
     function uploadFile(req, res, next){
         let imageFile = req.files.file;
@@ -37,10 +41,44 @@ function configure(app) {
       
     };
 
+    function addLeague(req, res, next){
+        res.status(200);
+
+        let leagueObject = req.body.leagueObject;
+        leagueObject.league = leagueObject.displayName.replace(' ', '_');
+
+        leagueService.LeagueSchemaService.Create(leagueObject, (err, response)=>{
+            let _league = response.league;
+            if(err){
+                res.json({data: {error: err}});
+            }else{
+                importService.ImportService.UploadFile(leagueObject.league, (uploadErr, uploadResponse)=>{
+                    if(uploadErr){
+                        res.json({data: {error: uploadErr}});
+                    }else{
+                        res.json({data: {league: _league, success: 'Successfully imported player data for your league.'}});
+                    }
+                });
+            }
+        });
+    };
+
+    function getLeague(req, res, next){
+        res.status(200);
+
+        leagueService.LeagueSchemaService.GetByLeague(req.body.leagueObject.league, (err, response)=>{
+            if(err){
+                res.json({data: {error: err}});
+            }else{
+                res.json({data: response});
+            }
+        });
+    };
+
     function getPlayers(req, res, next){
         res.status(200);
 
-        playersService.PlayersSchemaService.GetAll((err, response)=>{
+        playersService.PlayersSchemaService.GetAll(req.body.league, (err, response)=>{
             if(err){
                 res.json({data: {error: err}});
             }else{
@@ -52,7 +90,7 @@ function configure(app) {
     function getTeams(req, res, next){
         res.status(200);
 
-        teamsService.TeamsSchemaService.GetAll((teamsErr, teamsResponse)=>{
+        teamsService.TeamsSchemaService.GetAll(req.body.league, (teamsErr, teamsResponse)=>{
             if(teamsErr){
                 res.json({data: {error: teamsErr}});
             }else{
@@ -80,6 +118,7 @@ function configure(app) {
 
         let draftOptions = req.body.draftOptions;
         let pickOptions = {
+            league: draftOptions.league,
             teamName: draftOptions.draftedByUser,
             playerId: draftOptions.id,
             roundDraft: draftOptions.roundDrafted,
@@ -107,7 +146,8 @@ function configure(app) {
         let unDraftOptions = req.body.unDraftOptions;
         let deletePick = {
             teamName: unDraftOptions.draftedByUser,
-            playerId: unDraftOptions.id
+            playerId: unDraftOptions.id,
+            league: unDraftOptions.league
         }
 
         playersService.PlayersSchemaService.Update(unDraftOptions, (unDraftErr, unDraftResponse)=>{
@@ -140,7 +180,25 @@ function configure(app) {
     function addTeam(req, res, next){
         res.status(200);
 
-        teamsService.TeamsSchemaService.Create(req.body.teamObject, (err, response)=>{
+        leagueService.LeagueSchemaService.GetByLeague(req.body.teamObject.league, (leagueErr, leagueResponse)=>{
+            if(!leagueErr && leagueResponse.league){
+                teamsService.TeamsSchemaService.Create(req.body.teamObject, (err, response)=>{
+                    if(err){
+                        res.json({data: {error: err}});
+                    }else{
+                        res.json({data: response});
+                    }
+                });
+            }else{
+                res.json({data: {error: leagueErr}});
+            }
+        });
+    };
+
+    function deleteTeam(req, res, next){
+        res.status(200);
+
+        teamsService.TeamsSchemaService.Delete(req.body.teamObject, (err, response)=>{
             if(err){
                 res.json({data: {error: err}});
             }else{
@@ -148,6 +206,7 @@ function configure(app) {
             }
         });
     };
+    
 
     function downloadDraft(req, res, next){
         res.status(200);
@@ -164,16 +223,17 @@ function configure(app) {
     function resetDB(req, res, next){
         res.status(200);
 
-        importService.ImportService.UploadFile((err, response)=>{
+        importService.ImportService.UploadFile(req.body.leagueName, (err, response)=>{
             if(err){
                 res.json({data: {error: err}});
             }else{
                 var Picks = require('../mongo/schemas/PicksSchema');
-                Picks.remove({}, function(mongoErr) { 
+                Picks.remove({league: req.body.leagueName}, function(mongoErr) { 
                     if(mongoErr){
                         res.json({data: {error: mongoErr}});
                     }else{
-                        res.json({data: response});
+                        let r = {success: `${response.success} and removed all picks`};
+                        res.json({data: r});
                     }
                 });
             }

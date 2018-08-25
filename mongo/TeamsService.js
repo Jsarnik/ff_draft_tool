@@ -5,13 +5,20 @@ var _ = require('lodash');
 class TeamsSchemaService{
     
     Create(teamObject, nextFn){
-        this.SaveSchema(teamObject, (saveErr, savedTeamObject) =>{
-            return nextFn(saveErr, savedTeamObject);
-        });
+        this.GetOne(teamObject, (getErr, getRes) =>{
+            if(!getRes){
+                this.SaveSchema(teamObject, (saveErr, savedTeamObject) =>{
+                    return nextFn(saveErr, savedTeamObject);
+                });
+            }else{
+                return nextFn(getErr);
+            }
+        })
+
     }
 
-    GetAll(nextFn){
-        Team.find({}, function(err, teams) {
+    GetAll(leagueName, nextFn){
+        Team.find({league: leagueName}, function(err, teams) {
             if(err){
                 return nextFn(err);  
             }
@@ -27,13 +34,10 @@ class TeamsSchemaService{
         });
     }
 
-    GetOne(name, nextFn){
-        Team.findOne({name:name}, function(err, team) {
-            if(err){
-                return nextFn(err);  
-            }
-
-            nextFn(null, team._doc);  
+    GetOne(teamObject, nextFn){
+        Team.findOne({league: teamObject.league, name:teamObject.team}, function(err, team) {
+            let _t = team ? team._doc : null;
+            nextFn(err, _t);
         });
     }
 
@@ -44,8 +48,8 @@ class TeamsSchemaService{
         });
     }
 
-    Delete(name, nextFn){
-        Team.remove({name: name}, (err, res)=>{
+    Delete(teamObject, nextFn){
+        Team.remove({name: teamObject.name}, (err, res)=>{
             nextFn(err, res);
         })
     }
