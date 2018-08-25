@@ -4,7 +4,6 @@ import FileUpload from './components/FileUpload';
 import DraftTool from './components/DraftTool';
 import ConfigureTeams from './components/ConfigureTeams';
 import Roster from './components/Roster';
-import logo from './logo.svg';
 import './css/main.css';
 
 class App extends Component {

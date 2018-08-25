@@ -136,3 +136,5 @@ error: 'Failed to import undefined', Reason: ValidationError: team: Path `team` 
 error: 'Failed to import undefined', Reason: ValidationError: team: Path `team` is required., name: Path `name` is required., rank: Path `rank` is required. {"timestamp":"2018-08-24T22:55:23.419Z"}
 info: Node App Started {"timestamp":"2018-08-24T23:16:55.539Z"}
 info: Node App Started {"timestamp":"2018-08-24T23:19:48.845Z"}
+info: Node App Started {"timestamp":"2018-08-25T02:50:19.004Z"}
+info: Node App Started {"timestamp":"2018-08-25T02:52:18.406Z"}

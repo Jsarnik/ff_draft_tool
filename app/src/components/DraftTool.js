@@ -3,6 +3,7 @@ import ActveTeamRoster from '../components/ActveTeamRoster'
 import axios from 'axios';
 import * as _ from 'lodash';
 import DropDown from '../components/DropDown';
+import config from '../globals';
 
 class DraftTool extends Component {
 
@@ -53,8 +54,8 @@ class DraftTool extends Component {
     }
 
     componentDidMount = () =>{
-      let teamsUrl = 'http://localhost:3001/api/getTeams';
-      let playersUrl = 'http://localhost:3001/api/getPlayers';
+      let teamsUrl = `${config.baseApiUri}/api/getTeams`;
+      let playersUrl = `${config.baseApiUri}/api/getPlayers`;
 
       axios.get(teamsUrl)
       .then(teamsRes => {
@@ -130,7 +131,7 @@ class DraftTool extends Component {
         draftOptions: player
       }
 
-      axios.post('http://localhost:3001/api/draftPlayer', options).then(updatedPlayerRes =>{
+      axios.post(`${config.baseApiUri}/api/draftPlayer`, options).then(updatedPlayerRes =>{
         this.setState({
           teams: {...this.state.teams, [this.state.currentPick.team]: {...this.state.teams[this.state.currentPick.team], picks: teamPicks}},
           players: {...this.state.players, [player.id]: player},
@@ -157,8 +158,8 @@ class DraftTool extends Component {
       let options = {
         unDraftOptions: player
       }
-
-      axios.post('http://localhost:3001/api/unDraftPlayer', options).then(updatedPlayerRes =>{
+      
+      axios.post(`${config.baseApiUri}/api/unDraftPlayer`, options).then(updatedPlayerRes =>{
         this.setState({
           teams: {...this.state.teams, [draftedByUser]: {...this.state.teams[draftedByUser], picks: teamPicks}},
           players: {...this.state.players, [player.id]: player}

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import config from '../globals';
 
 class FileUpload extends Component {
 
@@ -20,9 +21,10 @@ class FileUpload extends Component {
       data.append('file', this.uploadInput.files[0]);
       data.append('filename', this.fileName.value);
   
-      axios.post('http://localhost:3001/upload', data)
+      
+      axios.post(`${config.baseApiUri}/api/upload`, data)
         .then(function (response) {
-            this.setState({ imageURL: `http://localhost:3001/`, uploadStatus: true });
+            this.setState({ imageURL: `${config.baseApiUri}`, uploadStatus: true });
         })
         .catch(function (error) {
           console.log(error);
@@ -30,7 +32,7 @@ class FileUpload extends Component {
     }
 
     downloadResults = () =>{
-      axios.get('http://localhost:3001/api/downloadDraft')
+      axios.get(`${config.baseApiUri}/api/downloadDraft`)
       .then(res => {
         this.setState({
           download_status: res.data.data.success
@@ -43,7 +45,9 @@ class FileUpload extends Component {
     }
 
     resetDB=()=>{
-      axios.get('http://localhost:3001/api/resetDB')
+      let baseAPIURI = config.baseApiUri;
+
+      axios.get(`${config.baseApiUri}/api/resetDB`)
       .then(res => {
         this.setState({
           db_status: res.data.data.success
@@ -57,7 +61,7 @@ class FileUpload extends Component {
 
    render() {
      return(
-       <div class="container">
+       <div className="container">
          <form onSubmit={this.handleUpload}>
            <div className="form-group">
              <input className="form-control"  ref={(ref) => { this.uploadInput = ref; }} type="file" />

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import Teams from '../components/Teams';
+import config from '../globals';
 
 class DraftTool extends Component {
 
@@ -16,7 +17,7 @@ class DraftTool extends Component {
     }
 
     componentDidMount = () => {
-      let url = `http://localhost:3001/api/getTeams`;
+      let url = `${config.baseApiUri}/api/getTeams`;
   
       axios.get(url)
         .then(res => {
@@ -66,8 +67,8 @@ class DraftTool extends Component {
       if(tempId){
         delete teamsCopy[tempId];
       }
-
-      let url = `http://localhost:3001/api/addTeam`;
+      
+      let url = `${config.baseApiUri}/api/addTeam`;
       let options = {teamObject: team};
   
       axios.post(url, options)

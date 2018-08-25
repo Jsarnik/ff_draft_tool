@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import * as _ from 'lodash';
 import axios from 'axios';
+import config from '../globals';
 
 class Roster extends Component {
     constructor(props) {
@@ -33,7 +34,7 @@ class Roster extends Component {
     }
 
     componentDidMount = () =>{
-      let rosterUrl = 'http://localhost:3001/api/getTeamRoster';
+      let rosterUrl = `${config.baseApiUri}/api/getTeamRoster`;
       let options = {
         teamName: this.state.teamName
       }
