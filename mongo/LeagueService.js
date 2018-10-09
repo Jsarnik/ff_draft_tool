@@ -59,7 +59,7 @@ class LeagueSchemaService{
                 if(err){
                     reject(err);
                 }else{
-                    resolve(newLeagueSchema._doc);
+                    resolve(leagueObject);
                 }
             });
         });

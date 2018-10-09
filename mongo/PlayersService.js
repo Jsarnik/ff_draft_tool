@@ -61,7 +61,7 @@ class PlayersSchemaService{
                 if(err){
                     reject(err);
                 }else{
-                    resolve(newPlayersSchema._doc);
+                    resolve(playerObject);
                 }
             });
         });

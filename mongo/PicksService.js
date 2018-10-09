@@ -83,7 +83,7 @@ class PicksSchemaService{
                 if(err){
                     reject(err);
                 }else{
-                    resolve(newPickSchema._doc)
+                    resolve(pickObject)
                 }
             });
         });

@@ -61,7 +61,7 @@ class TeamsSchemaService{
                 if(err){
                     reject(err);
                 }else{
-                    resolve(newTeamSchema._doc)
+                    resolve(teamObject)
                 }
             });
         });
