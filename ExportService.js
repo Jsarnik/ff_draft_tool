@@ -8,7 +8,7 @@ var csv = require("fast-csv");
 var playersService = require('./mongo/PlayersService');
 var picksService = require('./mongo/PicksService');
 var teamsService = require('./mongo/TeamsService');
-var leagueService = require('./mongo/leagueService');
+var leagueService = require('./mongo/LeagueService');
 var async = require('async');
 
 class ExportService{
