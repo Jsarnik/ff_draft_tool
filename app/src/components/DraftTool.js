@@ -128,7 +128,7 @@ class DraftTool extends Component {
       }
 
       if(!_.isEmpty(this.props.league) && this.props.league.removedDate !== null){
-        this.props.history.push('/data');
+        this.props.history.push(`/${this.props.league.league}/data`);
       }
 
       if(this.props.data.dialogOptions.result !== null){

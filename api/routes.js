@@ -50,7 +50,7 @@ function configure(app) {
         leagueObject.league = leagueObject.displayName.replace(' ', '_');
 
         leagueService.LeagueSchemaService.Create(leagueObject).then((response)=>{
-            let _league = response.league;
+            let _league = response;
             importService.ImportService.UploadFile(leagueObject.league).then((uploadResponse)=>{
                 res.json({data: {league: _league, success: 'Successfully imported player data for your league.'}});
             }).catch((uploadErr)=>{

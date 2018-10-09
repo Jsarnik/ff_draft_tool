@@ -52,9 +52,9 @@ class App extends Component {
                 <div>
                   <HeaderLinks leagueName={this.leagueName}/>
                   <Route exact path="/" render={(props) => <LandingPage {...props}/>} />
-                  <Route path="/:leagueName/draft" render={(props) => <DraftTool {...props} leagueName={this.leagueName} onEnterRoute={this.handleEnterRoute} league={this.props.league}/>}/>
-                  <Route path="/:leagueName/data" render={(props) => <ManageData {...props} leagueName={this.leagueName} onEnterRoute={this.handleEnterRoute} league={this.props.league}/>}/>
-                  <Route path="/:leagueName/teams" render={(props) => <ConfigureTeams {...props} leagueName={this.leagueName} onEnterRoute={this.handleEnterRoute}/>} league={this.props.league}/>
+                  <Route path="/:leagueName/draft" render={(props) => <DraftTool {...props} leagueName={this.leagueName} onEnterRoute={this.handleEnterRoute}/>}/>
+                  <Route path="/:leagueName/data" render={(props) => <ManageData {...props} leagueName={this.leagueName} onEnterRoute={this.handleEnterRoute}/>}/>
+                  <Route path="/:leagueName/teams" render={(props) => <ConfigureTeams {...props} leagueName={this.leagueName} onEnterRoute={this.handleEnterRoute}/>}/>
                   <ConfirmationPopup />
                 </div>
               </Router>

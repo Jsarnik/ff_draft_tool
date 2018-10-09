@@ -108,7 +108,8 @@ class ManageData extends Component {
  function mapStateToProps(state, ownProps){
   return {
     routes: state.routes,
-    data: state.data
+    data: state.data,
+    league: state.league
   };
 }
 

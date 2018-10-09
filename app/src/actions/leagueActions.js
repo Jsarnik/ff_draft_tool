@@ -39,9 +39,9 @@ export function createLeague(leagueModel){
        return axios.post(url, options)
         .then(res => {
             let error = !res.data.data ? `Could not create league name '${leagueModel.league}'` : res.data.data.error;
-            let dispatchFn = error ? createLeagueFailure(error) : createLeagueSuccess(res.data.data);
+            let dispatchFn = error ? createLeagueFailure(error) : createLeagueSuccess(res.data.data.league);
             dispatch(dispatchFn);
-            return res.data.data;
+            return res.data.data.league;
         }).catch(e => {
             dispatch(createLeagueFailure(e.message));
             return e;
