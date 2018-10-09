@@ -1,88 +1,25 @@
 import React, { Component } from 'react';
 import * as _ from 'lodash';
-import axios from 'axios';
-import config from '../globals';
 
 class Roster extends Component {
-    constructor(props) {
-      super(props);
-    
-      this.state = {
-        teamName: props.match.params.teamName,
-        teamRoster:{
 
-        },
-        rosterTemplate: {
-          qb: null,
-          rb1: null,
-          rb2: null,
-          wr1: null,
-          wr2: null,
-          te: null,
-          flex: null,
-          dst: null,
-          k: null,
-          bench1: null,
-          bench2: null,
-          bench3: null,
-          bench4: null,
-          bench5: null,
-          bench6: null,
-          bench7: null
-        }
-      }
-    }
-
-    componentDidMount = () =>{
-      let rosterUrl = `${config.baseApiUri}/api/getTeamRoster`;
-      let options = {
-        teamName: this.state.teamName
-      }
-
-      axios.post(rosterUrl, options)
-      .then(rosterRes => {
-        let filledRoster = rosterRes.data.data;
-        let template = this.state.rosterTemplate;
-
-      _.each(filledRoster, (filled, k)=>{
-        let f_pos = filled.pos.toLowerCase().replace(/[0-9]/g, '');  
-        _.each(template, (temp, key)=>{
-            let replacedKey = key.replace(/[0-9]/g, '');
-            if(!filled.isFilled){
-              if(replacedKey === f_pos && !temp && !filled.isFilled){
-                filled.isFilled = true;
-                template[key] = filled;
-              }
-              else if(replacedKey === 'flex' && !temp && (f_pos === 'wr' || f_pos === 'rb' || f_pos === 'te') && !filled.isFilled){
-                filled.isFilled = true;
-                template[key] = filled;
-              }
-              else if(replacedKey === 'bench' && !temp && !filled.isFilled){
-                filled.isFilled = true;
-                template[key] = filled;
-              }
-            }
-          }); 
-        });          
-
-        this.setState({
-          teamRoster: template
-        });
-      });
-    }
-   
     roster = () =>{
-      return _.map(this.state.teamRoster, (spot, key)=>{
+      return _.map(this.props.currentPick.roster, (spot, key)=>{
+        let type = key.replace(/\d/g,'');
         if(spot){
           return (
             <div key={key} className="flex-container">
               <div className="flex-item">
-                  {key}
+                  {type.toUpperCase()}
               </div>
               <div className="flex-item">
-                  <div>{spot.name}</div>
-                  <div>{spot.pos}</div>
-                  <div>{spot.overall} overall</div>
+                  {spot.name} 
+              </div>
+              <div className="flex-item half right">
+                  {spot.bye}
+              </div>
+              <div className="flex-item right">
+                  {spot.overall}
               </div>
             </div>
           )
@@ -90,10 +27,16 @@ class Roster extends Component {
           return (
             <div key={key}  className="flex-container">
               <div className="flex-item">
-                  {key}
+                {type.toUpperCase()}
               </div>
-              <div className="flex-item">
-                  NOT FILLED
+              <div className="flex-item center">
+                 -
+              </div>
+              <div className="flex-item half">
+
+              </div>
+              <div className="flex-item right">
+                  
               </div>
             </div>
           )
@@ -105,11 +48,23 @@ class Roster extends Component {
    render() {
      return(
        <div>
-         <div className="flex-container">
+        <div className="flex-container">
+          <div className="flex-item">
+            {this.props.currentPick.team}
+          </div>
+        </div>
+         <div className="flex-container header-row">
             <div className="flex-item">
               Position
             </div>
             <div className="flex-item">
+              Name
+            </div>
+            <div className="flex-item half right">
+              Bye
+            </div>
+            <div className="flex-item right">
+              Overall
             </div>
          </div>
          {this.roster()}

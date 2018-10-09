@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import axios from 'axios';
+import { bindActionCreators } from 'redux';
+import * as teamsActions from '../actions/teamsActions';
+import * as dataActions from '../actions/dataActions';
 import Teams from '../components/Teams';
-import config from '../globals';
 import Input from '../components/Input';
 import * as _ from 'lodash';
 
@@ -10,40 +12,58 @@ class DraftTool extends Component {
 
     constructor(props) {
       super(props);
-        if(!props.match.params.league){
-          this.props.history.push('/');
+        if(!props.match.params.leagueName){
+          props.history.push('/');
         }
 
-        props.onLeagueSetFn(props.match.params.league);
-
+        this.leagueName = props.match.params.leagueName;
+        
         this.state = {
-          league: props.match.params.league,
+          tempTeamsList: {},
           totalTeams: 10,
-          teams: {},
-          isEditTeamCount: false
+          isEditTeamCount: false,
+          isEditMode: false
         }
-
-        this.tempTeam = {};
     }
 
-    componentDidMount = () => {
-      let url = `${config.baseApiUri}/api/getTeams`;
-      let options = {
-        league: this.state.league
+    componentDidMount = () =>{
+      if(!this.props.routes.leagueName){
+        this.props.onEnterRoute(this.props.match);
       }
 
-      axios.post(url, options)
-        .then(res => {
-          let data = res.data.data;
-          this.updateTotalTeams(this.state.totalTeams, data);
-        }).catch(e =>{
-          console.log(e);
-        });
+      if(_.isEmpty(this.props.teams)){
+        this.props.teamsActions.getTeams(this.leagueName);
+      }
+      
+      if(_.isEmpty(this.state.tempTeamsList)){
+        this.updateTotalTeams(this.state.totalTeams, _.cloneDeep(this.props.teams));
+      }
+    }
+
+    componentDidUpdate = (prevProps) => {
+      if(!this.props.routes.leagueName){
+        this.props.history.push('/');
+      }
+
+      if(!_.isEmpty(this.props.league) && this.props.league.removedDate !== null){
+        this.props.history.push('/data');
+      }
+
+      if(this.props.teams !== prevProps.teams){
+        this.updateTotalTeams(this.state.totalTeams, _.cloneDeep(this.props.teams));
+      }
+
+      if(this.props.data.dialogOptions.result !== null){
+        if(this.props.data.dialogOptions.result === true && this.props.data.dialogOptions.execFn){
+          this.props.data.dialogOptions.execFn();
+        }
+        this.props.dataActions.resetConfirmDialog();
+      }
     }
 
     updateTotalTeams = (totalTeams, currentTeams) =>{
-      let currentTeamsList = Object.keys(currentTeams);
-      let emptyTeams = totalTeams - currentTeamsList.length;
+      let emptyTeams = totalTeams - Object.keys(currentTeams).length;
+      let draftPos = totalTeams - emptyTeams + 1;
       let updated = false;
 
       if(emptyTeams >= 0){
@@ -51,9 +71,12 @@ class DraftTool extends Component {
           for(let i = 0; i<emptyTeams; i++){
             let keyVal = recursiveKeyCheck('temp', i);
             currentTeams[keyVal] = {
-                  name: null,
-                  owner: null
-              }
+                displayName: null,
+                name: null,
+                owner: null,
+                draftPos: draftPos
+            }
+            draftPos++;
           }
       }else{
         let deletedCount = 0;
@@ -69,7 +92,7 @@ class DraftTool extends Component {
       if(updated){
         this.setState({ 
           totalTeams: totalTeams,
-          teams: currentTeams
+          tempTeamsList: currentTeams
         });
       }
 
@@ -81,63 +104,73 @@ class DraftTool extends Component {
     }
 
     handleChange = (params, value) =>{
+      let clone = _.cloneDeep(this.state.tempTeamsList[params.prop1]);
+      clone.editedRollBack = !clone.editedRollBack ? this.state.tempTeamsList[params.prop1] : clone.editedRollBack;
+      clone[params.prop2] = value;
+
       this.setState({
-        teams: {...this.state.teams, [params.prop1]: {...this.state.teams[params.prop1], [params.prop2]: value}}
+        tempTeamsList: {...this.state.tempTeamsList,
+            [params.prop1]: clone
+        }
       });
     }
 
-    updateTeam = (key, team, isEdit, isDelete) =>{
-      if((!team.displayName || !team.owner) && !isDelete) return;
-      team.league = this.state.league;
+    handleClick = (isCancel) =>{
+      let _tempTeams = {...this.state.tempTeamsList};
 
-      let formattedId = team.displayName.replace(/[^A-Z0-9]/ig, "_");
-      let teamsCopy = this.state.teams;
-      
-      if(isDelete){
-        delete teamsCopy[formattedId];
-        this.updateTeamsDB(team, teamsCopy, true);
-        return;
-      }
+      _.each(_tempTeams, (team, key)=>{
+        if(team.editedRollBack){
+          if(isCancel){
+            team = team.editedRollBack;
+          }else{
+            delete team.editedRollBack;
+          }
+          this.updateTeam(key, team, false);
+        }
+      });
 
-      if(isEdit){
-        team.isEditable = true;
-        this.setState({
-          teams: {...this.state.teams, [formattedId]: team}
-        });
-        return;
-      }
-
-      let tempId = key !== team.name ? key : null;
-      team.name = formattedId; // remove all special char, replace with _
-      team.isEditable = false;
-      teamsCopy[formattedId] = team;
-
-      if(tempId){
-        delete teamsCopy[tempId];
-      }
-  
-      this.updateTeamsDB(team, teamsCopy, false);
+      this.setState({
+        isEditMode: false
+      })
     }
 
-    updateTeamsDB = (team, updatedTeamObject, isDelete) =>{
-      let url = isDelete ? `${config.baseApiUri}/api/deleteTeam` : `${config.baseApiUri}/api/addTeam`;
-      let options = {teamObject: team};
+    editTeam = (key, team, isDelete) =>{
+      if(isDelete){
+        return this.props.dataActions.setConfirmDialogOptions(`Are you sure you want to remove ${team.name} from the roster?`, ()=>{this.updateTeam(key, team, isDelete)});
+      }
 
-      axios.post(url, options)
-        .then(res => {
-          this.setState({
-            totalTeams: updatedTeamObject.length,
-            teams: updatedTeamObject
-          });
-        }).catch(e=>{
-            console.log(e);
-        });
+      this.updateTeam(key, team, isDelete);
+    }
+
+    updateTeam = (key, team, isDelete) =>{
+      if((!team.displayName || !team.owner) && !isDelete) return;
+
+      team.name = team.displayName.replace(/[^A-Z0-9]/ig, "_");
+      team.league = this.leagueName;
+      let isUpdate = this.props.teams.hasOwnProperty(key);
+      let keyChangeRequiresDelete = (key.indexOf('temp_') === -1 && key !== team.name) ? key : null;
+
+      this.updateTeamsDB(team, isDelete, isUpdate, keyChangeRequiresDelete);
+    }
+
+    updateTeamsDB = (team, isDelete, isUpdate, keyChangeRequiresDelete) =>{
+      if(isDelete){
+        this.props.teamsActions.deleteTeam(team).then((res)=>{});
+        return;
+      }
+
+      if(isUpdate){
+        this.props.teamsActions.updateTeam(team, keyChangeRequiresDelete).then((res)=>{});
+        return;
+      }
+
+      this.props.teamsActions.createTeam(team).then((res)=>{});
     }
 
     handleTeamCountChange = (params, value) =>{
       let v = parseInt(value,10);
       if(v > 20) return;
-      let teamList = Object.keys(this.state.teams);
+      let teamList = Object.keys(this.state.tempTeamsList);
       let savedTeamsCount = 0;
 
       _.each(teamList, (key)=>{
@@ -147,7 +180,7 @@ class DraftTool extends Component {
       });
 
       if(v >= savedTeamsCount){
-        this.updateTotalTeams(v, this.state.teams);
+        this.updateTotalTeams(v, this.state.tempTeamsList);
       }
     }
 
@@ -160,17 +193,66 @@ class DraftTool extends Component {
       )
     }
 
+    toggleEditMode = (val) =>{
+      this.setState({
+        isEditMode: val
+      })
+    }
+
+    buttonLayout = () => {
+      if(this.state.isEditMode){
+        return (
+          <div className="flex-item">
+            <div className="flex-container">
+              <div className="flex-item">
+                <div className="button delete" onClick={()=> this.handleClick(true)}>Cancel</div>
+              </div>
+              <div className="flex-item">
+                <div className="button" onClick={()=> this.handleClick()}>Save</div>
+              </div>
+            </div>
+          </div>
+        )
+      }else{
+        return (
+          <div className="flex-item left">
+              <div className="button edit" onClick={()=> this.toggleEditMode(true)}>Edit Teams</div>
+          </div>
+        )
+      }
+    }
+
    render() {
      return(
        <div className="add-teams">
           {this.totalTeams()}
+          <div className="flex-container manage-teams-controls">
+            {this.buttonLayout()}
+          </div>
           <Teams totalTeams={this.state.totalTeams}
-                 teams={this.state.teams}
-                 editTeamFn={this.updateTeam}
-                 handleChangeFn={this.handleChange}/>
+                 teams={this.state.tempTeamsList}
+                 editTeamFn={this.editTeam}
+                 handleChangeFn={this.handleChange}
+                 isEditMode={this.state.isEditMode}/>
        </div>
      )
    }
  }
 
-export default withRouter(DraftTool);
+ function mapStateToProps(state, ownProps){
+  return {
+    league: state.league,
+    teams: state.teams,
+    routes: state.routes,
+    data: state.data
+  };
+}
+
+function mapDispatchToProps(dispatch){
+ return {
+   teamsActions: bindActionCreators(teamsActions, dispatch),
+   dataActions: bindActionCreators(dataActions, dispatch)
+ };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps) (withRouter(DraftTool));

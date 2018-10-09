@@ -1,10 +1,6 @@
 import React, { Component } from 'react';
 
 class Input extends Component {
-  constructor(props) {
-    super(props);
-   
-  }
 
     handleChange = (event) =>{
        this.props.onChangeFn(this.props.params, event.target.value);
@@ -13,7 +9,7 @@ class Input extends Component {
    render() {
      return(
          <div>
-            <input type={this.props.type} value={this.props.value} onChange={(e)=>this.handleChange(e)} />
+            <input placeholder={this.props.placeholder} disabled={this.props.isDisabled} type={this.props.type} value={this.props.value || ''} onChange={(e)=>this.handleChange(e)} />
          </div>
      )
    }

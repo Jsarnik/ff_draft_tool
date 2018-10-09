@@ -7,6 +7,7 @@ var routes = require('./api/routes');
 var cors = require('cors');
 var Logger = require('./Logger');
 var app = express();
+var cleanupService = require('./CleanupService');
 
 mongoConfig.MongoConfiguration.Initialize();
 var mongoDb = mongoConfig.MongoConfiguration.MongoDb();
@@ -51,6 +52,7 @@ httpServer.listen(httpPort, (err) =>{
             level : 'info',
             message: "Node App Started"
         });
+        cleanupService.CleanupService.Initialize();
     }
 }); 
 
