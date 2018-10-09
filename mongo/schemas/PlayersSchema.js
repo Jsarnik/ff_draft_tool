@@ -2,7 +2,8 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var PlayersSchema = new Schema({
-    rank: { type: Number, required: true, index: { unique: true }},
+    league: { type: String, required: true},
+    rank: { type: Number, required: true},
     name: { type: String, required: true },
     team: { type: String, required: true },
     pos: { type: String, required: false },

@@ -4,6 +4,7 @@ var express = require('express');
 var playersService = require('../mongo/PlayersService');
 var picksService = require('../mongo/PicksService');
 var teamsService = require('../mongo/TeamsService');
+var leagueService = require('../mongo/LeagueService');
 var importService = require('../ImportService');
 var exportService = require('../ExportService');
 var async = require('async');
@@ -16,12 +17,17 @@ function configure(app) {
     // Routes
     router.post('/upload', uploadFile);
     router.post('/addTeam', addTeam);
+    router.post('/updateTeam', updateTeam);
+    router.post('/deleteTeam', deleteTeam);
     router.post('/draftPlayer', draftPlayer);
     router.post('/unDraftPlayer', unDraftPlayer);
     router.post('/getTeamRoster', getTeamRoster);
-    router.get('/getTeams', getTeams);
-    router.get('/getPlayers', getPlayers);
-    router.get('/resetDB', resetDB);
+    router.post('/addLeague', addLeague);
+    router.post('/getLeague', getLeague);
+    router.post('/updateLeague', updateLeague);
+    router.post('/getTeams', getTeams);
+    router.post('/getPlayers', getPlayers);
+    router.post('/resetDB', resetDB);
     router.get('/downloadDraft', downloadDraft);
 
     function uploadFile(req, res, next){
@@ -37,41 +43,66 @@ function configure(app) {
       
     };
 
+    function addLeague(req, res, next){
+        res.status(200);
+
+        let leagueObject = req.body.leagueObject;
+        leagueObject.league = leagueObject.displayName.replace(' ', '_');
+
+        leagueService.LeagueSchemaService.Create(leagueObject).then((response)=>{
+            let _league = response;
+            importService.ImportService.UploadFile(leagueObject.league).then((uploadResponse)=>{
+                res.json({data: {league: _league, success: 'Successfully imported player data for your league.'}});
+            }).catch((uploadErr)=>{
+                res.json({data: {error: uploadErr}});
+            });
+        }).catch((err)=>{
+            res.json({data: {error: err}});
+        });
+    };
+
+    function getLeague(req, res, next){
+        res.status(200);
+
+        leagueService.LeagueSchemaService.GetByLeague(req.body.leagueObject.league).then((response)=>{
+            res.json({data: response});
+        }).catch((err)=>{
+            res.json({data: {error: err}});
+        });
+    };
+
     function getPlayers(req, res, next){
         res.status(200);
 
-        playersService.PlayersSchemaService.GetAll((err, response)=>{
-            if(err){
-                res.json({data: {error: err}});
-            }else{
-                res.json({data: response});
-            }
+        playersService.PlayersSchemaService.GetAll(req.body.league).then((response)=>{
+            res.json({data: response});
+        }).catch((err)=>{
+            res.json({data: {error: err}});
         });
     };
 
     function getTeams(req, res, next){
         res.status(200);
 
-        teamsService.TeamsSchemaService.GetAll((teamsErr, teamsResponse)=>{
-            if(teamsErr){
-                res.json({data: {error: teamsErr}});
-            }else{
-                async.each(teamsResponse, (team, next)=>{
-                    picksService.PicksSchemaService.GetAllByTeam(team.name, (pickErr, pickResponse)=>{
-                        team.picks = {};
-                        if(pickResponse){
-                            team.picks = pickResponse;
-                        }
-                        next();
-                    });
-                }, (asyncErr)=>{
-                    if(asyncErr){
-                        res.json({data: {error: asyncErr}});
-                    }else{
-                        res.json({data: teamsResponse});
+        teamsService.TeamsSchemaService.GetAll(req.body.league).then((teamsResponse)=>{
+            async.each(teamsResponse, (team, next)=>{
+                picksService.PicksSchemaService.GetAllByTeam(team.name).then((pickResponse) => {
+                    if(pickResponse){
+                        team.picks = pickResponse;
                     }
+                    next();
+                }).catch((pickErr) =>{
+                    next();
                 });
-            }
+            }, (asyncErr)=>{
+                if(asyncErr){
+                    res.json({data: {error: asyncErr}});
+                }else{
+                    res.json({data: teamsResponse});
+                }
+            });
+        }).catch((teamsErr)=>{
+            res.json({data: {error: teamsErr}});
         });
     };
 
@@ -80,24 +111,21 @@ function configure(app) {
 
         let draftOptions = req.body.draftOptions;
         let pickOptions = {
+            league: draftOptions.league,
             teamName: draftOptions.draftedByUser,
             playerId: draftOptions.id,
             roundDraft: draftOptions.roundDrafted,
             overall: draftOptions.overall
         }
 
-        playersService.PlayersSchemaService.Update(draftOptions, (draftErr, draftResponse)=>{
-            if(draftErr){
-                res.json({data: {error: draftErr}});
-            }else{
-                picksService.PicksSchemaService.Create(pickOptions, (pickErr, pickResponse)=>{
-                    if(pickErr){
-                        res.json({data: {error: pickErr}});
-                    }else{
-                        res.json({data: {response:'Successfully Drafted.'}});
-                    }
-                });
-            }
+        playersService.PlayersSchemaService.Update(draftOptions).then((draftResponse)=>{
+            picksService.PicksSchemaService.Create(pickOptions).then((pickResponse) => {
+                res.json({data: {success:'Successfully Drafted.'}});
+            }).catch((pickErr) => {
+                res.json({data: {error: pickErr}});
+            });
+        }).catch((draftErr)=>{
+            res.json({data: {error: draftErr}});
         });
     };
 
@@ -107,77 +135,126 @@ function configure(app) {
         let unDraftOptions = req.body.unDraftOptions;
         let deletePick = {
             teamName: unDraftOptions.draftedByUser,
-            playerId: unDraftOptions.id
+            playerId: unDraftOptions.id,
+            league: unDraftOptions.league
         }
 
-        playersService.PlayersSchemaService.Update(unDraftOptions, (unDraftErr, unDraftResponse)=>{
-            if(unDraftErr){
-                res.json({data: {error: unDraftErr}});
-            }else{
-                picksService.PicksSchemaService.Delete(deletePick, (deletePickErr, deletePickResponse)=>{
-                    if(deletePickErr){
-                        res.json({data: {error: deletePickErr}});
-                    }else{
-                        res.json({data: {response:'Successfully UnDrafted.'}});
-                    }
-                });
-            }
+        playersService.PlayersSchemaService.Update(unDraftOptions).then((unDraftResponse)=>{
+            picksService.PicksSchemaService.Delete(deletePick).then((deletePickResponse) => {
+                res.json({data: {success:'Successfully UnDrafted.'}});
+            }).catch((deletePickErr)=>{
+                res.json({data: {error: deletePickErr}});
+            });
+        }).catch((unDraftErr)=>{
+            res.json({data: {error: unDraftErr}});
         });
     };
 
     
     function getTeamRoster(req, res, next){
         res.status(200);
-        playersService.PlayersSchemaService.GetByDraftedUser(req.body.teamName, (err, response)=>{
-            if(err){
-                res.json({data: {error: err}});
-            }else{
-                res.json({data: response});
-            }
+        playersService.PlayersSchemaService.GetByDraftedUser(req.body.teamName).then((response)=>{
+            res.json({data: response});
+        }).catch((err)=>{
+            res.json({data: {error: err}});
         });
     };
 
     function addTeam(req, res, next){
         res.status(200);
 
-        teamsService.TeamsSchemaService.Create(req.body.teamObject, (err, response)=>{
-            if(err){
-                res.json({data: {error: err}});
+        leagueService.LeagueSchemaService.GetByLeague(req.body.teamObject.league).then((leagueResponse)=>{
+            if(leagueResponse.league){
+                teamsService.TeamsSchemaService.TryCreate(req.body.teamObject).then((response)=>{
+                    res.json({data: response});
+                }).catch((err)=>{
+                    res.json({data: {error: err}});
+                });
             }else{
-                res.json({data: response});
+                res.json({data: {error: `Can't find league ${req.body.teamObject.league}`}});
             }
+        }).catch((leagueErr)=>{
+            res.json({data: {error: leagueErr}});
+        });
+    };
+
+    function updateTeam(req, res, next){
+        res.status(200);
+
+        leagueService.LeagueSchemaService.GetByLeague(req.body.teamObject.league).then((leagueResponse)=>{
+            if(leagueResponse.league){
+                if(req.body.keyChangeRequiresDelete){
+                    teamsService.TeamsSchemaService.CreateAndDelete(req.body.teamObject, req.body.keyChangeRequiresDelete).then((response)=>{
+                        res.json({data: response});
+                    }).catch((err)=>{
+                        res.json({data: {error: err}});
+                    });
+                }else{
+                    teamsService.TeamsSchemaService.Update(req.body.teamObject).then((response)=>{
+                        res.json({data: response});
+                    }).catch((err)=>{
+                        res.json({data: {error: err}});
+                    });
+                }
+            }else{
+                res.json({data: {error: `Can't find league ${req.body.teamObject.league}`}});
+            }
+        }).catch((leagueErr)=>{
+            res.json({data: {error: leagueErr}});
+        });
+    }
+
+    function deleteTeam(req, res, next){
+        res.status(200);
+
+        teamsService.TeamsSchemaService.Delete(req.body.teamObject).then((response)=>{
+            res.json({data: response});
+        }).catch((err)=>{
+            res.json({data: {error: err}});
+        });
+    };
+
+    function updateLeague(req, res, next){
+        res.status(200);
+
+        leagueService.LeagueSchemaService.Update(req.body.leagueObject).then((response)=>{
+            res.json({data: response._doc});
+        }).catch((err)=>{
+            res.json({data: {error: err}});
         });
     };
 
     function downloadDraft(req, res, next){
         res.status(200);
+        let leagueName = req.query.leagueName;
+        let isDownloadOnly = req.query.isDownloadOnly;
 
-        exportService.ExportService.GetDraftResults((err, response)=>{
-            if(err){
+        if(leagueName){
+            exportService.ExportService.GetDraftResults(leagueName, isDownloadOnly).then((response)=>{
+                res.download(response.path, response.fileName);
+            }).catch((err)=>{
                 res.json({data: {error: err}});
-            }else{
-                res.json({data: response});
-            }
-        });
+            });
+        }else{
+            res.json({data: {error: 'No league specified..'}});
+        }
     }
 
     function resetDB(req, res, next){
         res.status(200);
 
-        importService.ImportService.UploadFile((err, response)=>{
-            if(err){
-                res.json({data: {error: err}});
-            }else{
-                var Picks = require('../mongo/schemas/PicksSchema');
-                Picks.remove({}, function(mongoErr) { 
-                    if(mongoErr){
-                        res.json({data: {error: mongoErr}});
-                    }else{
-                        res.json({data: response});
-                    }
-                });
-            }
-
+        importService.ImportService.UploadFile(req.body.leagueName).then((response)=>{
+            let Picks = require('../mongo/schemas/PicksSchema');
+            Picks.remove({league: req.body.leagueName}, (mongoErr) => { 
+                if(mongoErr){
+                    res.json({data: {error: mongoErr}});
+                }else{
+                    let r = {success: `${response.success} and removed all picks`};
+                    res.json({data: r});
+                }
+            });
+        }).catch((err)=>{
+            res.json({data: {error: err}});
         });
     }
 }

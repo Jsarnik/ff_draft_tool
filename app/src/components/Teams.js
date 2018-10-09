@@ -3,53 +3,46 @@ import * as _ from 'lodash';
 import Input from '../components/Input';
 
 class Teams extends Component {
-  constructor(props) {
-    super(props);
-   
-  }
-    handleClick = (key, team, isEdit) =>{
-        this.props.editTeamFn(key, team, isEdit);
+    handleClick = (key, team, isDelete) =>{
+        this.props.editTeamFn(key, team, isDelete);
     }
 
     enterTeams = () => {
-      return _.map(this.props.teams, (team, key)=>{
-        if(!team.name || team.isEditable){     
-          return (
-            <div className="flex-container" key={key}>
+      _.each(this.props.teams, (team, key)=>{team.key = key});
+      let _orderedTeams = _.orderBy(this.props.teams, ['draftPos'], ['asc']);
+
+      return _.map(_orderedTeams, (team, index)=>{
+        let _placeholder = !team.name ? `ENTER TEAM ${index+1}` : '';
+        return (
+          <div className="flex-container" key={team.key} draftpos={parseInt(team.draftPos)}>
             <div className="flex-item">
-                <Input type="text" onChangeFn={this.props.handleChangeFn} value={team.displayName} params={{prop1: key, prop2:"displayName"}} />
+                <Input type="text" placeholder={_placeholder} isDisabled={!this.props.isEditMode} onChangeFn={this.props.handleChangeFn} value={team.displayName} params={{prop1: team.key, prop2:"displayName"}} />
               </div>
               <div className="flex-item">
-                <Input type="text" onChangeFn={this.props.handleChangeFn} value={team.owner} params={{prop1: key, prop2:"owner"}} />
+                <Input type="text" placeholder={_placeholder} isDisabled={!this.props.isEditMode} onChangeFn={this.props.handleChangeFn} value={team.owner} params={{prop1: team.key, prop2:"owner"}} />
               </div>
               <div className="flex-item">
-                <Input type="number" onChangeFn={this.props.handleChangeFn} value={team.draftPos} params={{prop1: key, prop2:"draftPos"}} />
+                <Input type="number" placeholder={_placeholder} isDisabled={!this.props.isEditMode} onChangeFn={this.props.handleChangeFn} value={team.draftPos} params={{prop1: team.key, prop2:"draftPos"}} />
               </div>
               <div className="flex-item">
-                <div className="button" onClick={()=> this.handleClick(key, team, false)}>Save</div>
-              </div>
+                {this.showHideRemoveButton(team.key, team)}
             </div>
-          )
-        }else{
-          return (
-            <div className="flex-container">
-              <div className="flex-item">
-                <div>{team.displayName}</div>
-              </div>
-              <div className="flex-item">
-                  <div>{team.owner}</div>
-              </div>
-              <div className="flex-item">
-                  <div>{team.draftPos}</div>
-              </div>
-              <div className="flex-item">
-                  <div className="button edit" onClick={()=> this.handleClick(key, team, true)}>Edit</div>
-              </div>
-            </div>
-          )
-          }
+          </div>
+        )
       });
     };
+
+    showHideRemoveButton = (key, team) =>{
+      if(!team.name){
+        return (
+          null
+        )
+      }else{
+        return (
+          <div className="button edit" onClick={()=> this.handleClick(key, team, true)}>Remove</div>
+        )
+      }
+    }
 
    render() {
      return(
@@ -68,7 +61,7 @@ class Teams extends Component {
                     &nbsp;
                 </div>
             </div>
-            {this.enterTeams()}
+            {_.orderBy(this.enterTeams(), ['draftpos'], ['asc'])}
          </div>
      )
    }

@@ -36,18 +36,27 @@ a, a:hover, a:active, a:visited {
     padding: 2px; }
     .flex-container .flex-item.half {
       flex-basis: 50%; }
+    .flex-container .flex-item.three-quarters {
+      flex-basis: 75%; }
     .flex-container .flex-item.title {
       font-weight: bold;
       background: #ccc; }
     .flex-container .flex-item.center {
       text-align: center; }
+    .flex-container .flex-item.right {
+      text-align: right; }
+
+.draft-tool {
+  width: 98%;
+  margin: 0 auto; }
 
 .drafted {
   opacity: .6; }
   .drafted div.button {
     border-color: red;
     color: red;
-    cursor: default; }
+    cursor: default;
+    opacity: .5; }
     .drafted div.button:hover {
       border-color: red;
       color: red; }
@@ -58,12 +67,17 @@ div.button {
   border-radius: 3px;
   text-align: center;
   width: auto;
-  margin: 0 auto;
   cursor: pointer;
-  width: 50%; }
-  div.button.reset {
-    border: 1px solid red;
-    margin-top: 100px; }
+  margin-right: 10px; }
+  div.button.remove {
+    border-color: red;
+    color: red;
+    cursor: pointer; }
+    div.button.remove:hover {
+      border-color: red;
+      color: red;
+      background: red;
+      color: #fff; }
   div.button.download {
     margin-top: 100px;
     border: 1px solid green; }
@@ -76,35 +90,74 @@ div.button {
       color: #fff; }
 
 .player-pickboard, .team-pickboard {
-  position: relative; }
+  position: relative;
+  font-size: .8em; }
+
+.player-pickboard {
+  display: inline-block;
+  width: 55%;
+  box-shadow: 0px 1px 5px #afafaf; }
+  .player-pickboard .flex-container.player-list-headers .flex-item:not(.no-sort) {
+    cursor: pointer; }
+  .player-pickboard .flex-container.player-list-headers .flex-item .asc:before, .player-pickboard .flex-container.player-list-headers .flex-item .desc:after {
+    border: 4px solid transparent;
+    content: "";
+    display: block;
+    height: 0;
+    right: 5px;
+    top: 50%;
+    position: absolute;
+    width: 0; }
+  .player-pickboard .flex-container.player-list-headers .flex-item .asc:before {
+    border-bottom-color: #666;
+    margin-top: -9px; }
+  .player-pickboard .flex-container.player-list-headers .flex-item .desc:after {
+    border-top-color: #666;
+    margin-top: 1px; }
+
+.add-teams .manage-teams-controls {
+  width: 50%;
+  text-align: left; }
 
 .team-pickboard {
-  padding: 2px;
-  background: #ccc;
-  border-bottom: 10px solid #000; }
+  margin-bottom: 25px;
+  border: 1px solid;
+  overflow: hidden; }
   .team-pickboard .flex-container {
     padding: 0; }
   .team-pickboard .header-row {
     width: 100%;
     z-index: 10;
     top: 0;
-    background: #fff;
-    box-shadow: 0px 0px 1px 1px #333; }
+    box-shadow: 0px 1px 2px 1px #333;
+    position: absolute;
+    background: #9c9c9c; }
+    .team-pickboard .header-row a, .team-pickboard .header-row a:visited, .team-pickboard .header-row a:hover {
+      color: #fff; }
     .team-pickboard .header-row .flex-item {
-      height: 20px;
+      height: 30px;
       font-size: .8em;
       color: #fff;
-      background: #333;
-      line-height: 1.6em; }
+      background: #848282;
+      opacity: 1;
+      font-weight: bold; }
+      .team-pickboard .header-row .flex-item.selected {
+        background: #3fe63f;
+        border: 5px solid #3fe63f;
+        color: #000; }
+    .team-pickboard .header-row .timer .flex-item {
+      font-size: 1em; }
   .team-pickboard .flex-item {
     background: #fff;
-    padding: 10px;
+    padding: 5px;
     margin: 2px;
     border: 5px solid transparent;
     display: inline-block;
-    opacity: .6;
+    opacity: .8;
     font-size: .7em;
-    text-align: center; }
+    text-align: center;
+    height: 25px;
+    overflow: hidden; }
     .team-pickboard .flex-item.rb {
       background-color: rgba(25, 0, 255, 0.664);
       box-shadow: inset 1px 0px 10px 5px #1900ff;
@@ -140,22 +193,28 @@ div.button {
       .team-pickboard .flex-item.no-cursor:hover {
         opacity: 1; }
     .team-pickboard .flex-item.selectable {
-      cursor: pointer; }
+      cursor: pointer;
+      background: #dedede; }
       .team-pickboard .flex-item.selectable:hover {
         border: 5px dashed #888888; }
     .team-pickboard .flex-item.selected {
-      opacity: 1;
       border: 5px dashed #000; }
+      .team-pickboard .flex-item.selected.selectable {
+        background: transparent; }
       .team-pickboard .flex-item.selected:hover {
         opacity: 1;
         border: 5px dashed #000; }
+  .team-pickboard .round-number {
+    background: #dedede;
+    opacity: 1; }
+  .team-pickboard .draft-cells-container {
+    padding-top: 57px;
+    box-shadow: 0px 1px 2px 1px inset #000; }
 
-.header-row .current-pick {
-  background: red; }
-  .header-row .current-pick .flex-item {
-    font-size: 2em;
-    text-align: center;
-    line-height: .6em; }
+.header-row .current-pick .flex-item {
+  font-size: 2em;
+  text-align: center;
+  line-height: .6em; }
 
 .filters {
   padding: 20px;
@@ -181,5 +240,156 @@ div.button {
   .header-bar .header-links {
     width: 25%;
     float: left; }
+
+.current-roster, .selected-roster {
+  width: 20%;
+  display: inline-block;
+  vertical-align: top; }
+  .current-roster .flex-container, .selected-roster .flex-container {
+    font-size: .8em; }
+    .current-roster .flex-container.header-row, .selected-roster .flex-container.header-row {
+      font-weight: bold; }
+
+.current-roster {
+  margin-right: 20px; }
+
+.selected-roster {
+  margin-left: 20px; }
+
+.scroll-bar {
+  position: relative;
+  width: 98%;
+  margin: 0 auto;
+  margin-bottom: 20px; }
+  .scroll-bar .overlay {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: 102px;
+    height: 52px;
+    border: 5px dashed #000;
+    box-shadow: 0px 1px 5px 0px #000 inset;
+    z-index: 10; }
+  .scroll-bar .scroll-container {
+    height: 50px;
+    display: block;
+    width: 100%;
+    position: relative;
+    border: 1px solid black;
+    overflow: hidden; }
+    .scroll-bar .scroll-container .scroll-content {
+      position: relative;
+      display: inline-block;
+      width: 12480px;
+      transition: margin 700ms; }
+      .scroll-bar .scroll-container .scroll-content .snake-team-item {
+        width: 100px;
+        display: inline-block;
+        height: 46px;
+        text-align: center;
+        position: relative;
+        border-right: 1px solid #000;
+        padding: 2px 0;
+        color: #fff;
+        text-shadow: 1px 1px 1px #000; }
+        .scroll-bar .scroll-container .scroll-content .snake-team-item.selected .bg {
+          opacity: 1;
+          transition: opacity 700ms;
+          box-shadow: none; }
+        .scroll-bar .scroll-container .scroll-content .snake-team-item .bg {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          z-index: -1;
+          top: 0;
+          left: 0;
+          opacity: .3;
+          box-shadow: 0px 1px 10px 2px inset #000; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_1 {
+            background: red; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_2 {
+            background: green; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_3 {
+            background: blue; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_4 {
+            background: orange; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_5 {
+            background: purple; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_6 {
+            background: yellow; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_7 {
+            background: grey; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_8 {
+            background: black; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_9 {
+            background: lightblue; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_10 {
+            background: pink; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_11 {
+            background: red; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_12 {
+            background: red; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_13 {
+            background: red; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_14 {
+            background: red; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_15 {
+            background: red; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_16 {
+            background: red; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_17 {
+            background: red; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_18 {
+            background: red; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_19 {
+            background: red; }
+          .scroll-bar .scroll-container .scroll-content .snake-team-item .bg.t_20 {
+            background: red; }
+
+.confirm-container {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 900; }
+  .confirm-container .confirm-bg {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    background: #000;
+    opacity: .2; }
+  .confirm-container .confirm-content {
+    width: 50%;
+    background: #fff;
+    margin: 0 auto;
+    top: 25%;
+    z-index: 100;
+    position: relative;
+    box-shadow: 0px 0px 10px 1px #a09f9f;
+    border-radius: 3px;
+    padding: 50px; }
+    .confirm-container .confirm-content .confirm-dialog {
+      text-align: center; }
+    .confirm-container .confirm-content .confirm-buttons {
+      margin: 10px; }
+      .confirm-container .confirm-content .confirm-buttons .button:hover {
+        box-shadow: 0px 0px 2px 1px #afafaf; }
+
+.count-down-clock {
+  text-shadow: 0px 2px 1px #000;
+  color: red;
+  animation: textgrowth 1s infinite;
+  animation-timing-function: ease-in-out;
+  width: 25px;
+  line-height: 0em; }
+
+@keyframes textgrowth {
+  0% {
+    font-size: 1em; }
+  100% {
+    font-size: 2em; } }
 
 /*# sourceMappingURL=main.css.map */

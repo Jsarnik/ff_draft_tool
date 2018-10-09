@@ -3,38 +3,37 @@ import * as _ from 'lodash';
 
 class Rounds extends Component {
 
-    constructor(props) {
-      super(props);
-    }
-
-    handleClick = (team, round, overall) =>{
+    handleClick = (team, round, _overAll, isDrafted) =>{
+        if(this.props.isTimerRunning) return;
         let pick = {
             team: team.name,
             roundNo: round,
-            overall: overall
+            overall: _overAll,
+            isDrafted: isDrafted
         }
         this.props.setCurrentPickFn(pick);
     }
+
     cell = (_roundNo) =>{
-        let teamCount = Object.keys(this.props.teams).length;
-        let overAll = 0;
+        let teamCount = Object.keys(this.props.orderedTeams).length;
+        let _overAll = 0;
         let isEvenRound = this.isEven(_roundNo);
 
         if(this.isEven(_roundNo)){
-            overAll = (_roundNo * teamCount) + 1;
+            _overAll = (_roundNo * teamCount) + 1;
         }else{
-            overAll = (_roundNo-1) * teamCount;
+            _overAll = (_roundNo-1) * teamCount;
         }
 
-        return _.map(this.props.teams, (team, key)=>{
+        return _.map(this.props.orderedTeams, (team, key)=>{
             if(_roundNo !== 1){
                 if(isEvenRound){
-                    overAll-=1;
+                    _overAll-=1;
                 }else{
-                    overAll+=1;
+                    _overAll+=1;
                 }
             }else{
-                overAll = team.draftPos;
+                _overAll = team.draftPos;
             }
 
             let _r = `round_${_roundNo}`;
@@ -44,19 +43,20 @@ class Rounds extends Component {
             let classes = isSelected ? 'selected' : '';
             let element = null;
 
-            if(pick){
+            if(pick && this.props.players[pick.playerId]){
                 pick.playerInfo = this.props.players[pick.playerId];
                 classes += ` ${pick.playerInfo.pos.replace(/\d/g,'').toLowerCase()}`;
                 element = 
-                    <div key={key} className={classes + " no-cursor flex-item"} onClick={()=> this.handleClick(team, _roundNo, overAll)}>
+                    <div key={key} className={classes + " no-cursor flex-item"} onClick={(e)=> this.handleClick(team, _roundNo, team.picks[_r].overall, true, e)}>
                         <div>{pick.playerInfo.name}</div>
                         <div>{pick.playerInfo.pos}</div>
                     </div>
             }else{
+                team.picks[_r] = {overall:_overAll};
                 element =
-                    <div key={key} className={classes + " selectable flex-item"} onClick={()=> this.handleClick(team, _roundNo, overAll)}>
-                         <div>{pickText}</div>
-                        <div>{overAll}</div>
+                    <div key={key} className={classes + " selectable flex-item"} onClick={(e)=> this.handleClick(team, _roundNo, team.picks[_r].overall, false)}>
+                        <div>{pickText}</div>
+                        <div>{_overAll}</div>
                     </div>
             }
 
@@ -73,7 +73,7 @@ class Rounds extends Component {
     row = (round) => {
         return (
             <div key={round} className="flex-container">
-                <div className="flex-item">
+                <div className="flex-item three-quarters round-number">
                     <div>{round}</div>
                     <div>&nbsp;</div>
                 </div>
@@ -92,7 +92,7 @@ class Rounds extends Component {
 
    render() {
         return(
-            <div>
+            <div className="draft-cells-container">
                 {this.round()}
             </div>
         )
