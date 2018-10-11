@@ -34,9 +34,9 @@ class PlayersSchemaService{
         });
     }
 
-    GetByDraftedUser(teamName){
+    GetByDraftedUser(_leageName, teamName){
         return new Promise((resolve, reject) => {
-            Player.find({draftedByUser: teamName}, (err, players) => {
+            Player.find({league:_leageName, draftedByUser: teamName}, (err, players) => {
                 if(err){
                     reject(err);  
                 }else{
@@ -82,7 +82,7 @@ class PlayersSchemaService{
 
     Update(playerObject){
         return new Promise((resolve, reject) => {
-            Player.update({name: playerObject.name}, playerObject, (err, updatedPlayerModel) =>{
+            Player.update({league: playerObject.league, name: playerObject.name}, playerObject, (err, updatedPlayerModel) =>{
                 if(err){
                     reject(err);
                 }else{

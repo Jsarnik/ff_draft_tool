@@ -153,7 +153,7 @@ function configure(app) {
     
     function getTeamRoster(req, res, next){
         res.status(200);
-        playersService.PlayersSchemaService.GetByDraftedUser(req.body.teamName).then((response)=>{
+        playersService.PlayersSchemaService.GetByDraftedUser(req.body.leagueName, req.body.teamName).then((response)=>{
             res.json({data: response});
         }).catch((err)=>{
             res.json({data: {error: err}});

@@ -23,7 +23,7 @@ class DraftTool extends Component {
 
         this.leagueName = props.match.params.leagueName;
         this.totalRounds = 12;
-        this.pickAllowedTime = 90;
+        this.pickAllowedTime = 2;
         
         this.state = {
           clockOptions:{
@@ -265,12 +265,11 @@ class DraftTool extends Component {
       };
 
       this.props.playersActions.draftPlayer(_player, newPick).then(res => {
+        if (res.error) return console.log(res.error);
         this.props.teamsActions.updatePick(newPick);
         this.updateTimer(this.state.clockOptions.isTimerRunning, this.state.clockOptions.pickAllowedTime, true);
         this.updateSnakeOrder(newPick.pick.overall, true);
         this.setCurrentPick(this.recursivelyFindNextPick(newPick.pick.overall), true);
-      }).catch(err =>{
-
       });
     }
 

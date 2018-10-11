@@ -48,6 +48,7 @@ export function draftPlayer(player){
         .then(res => {
             let dispatchFn = res.data.data.error ? draftPlayerFailure(player, res.data.data.error) : draftPlayerSuccess(player);
             dispatch(dispatchFn);
+            return (res.data.data);
         }).catch(e => {
             dispatch(draftPlayerFailure(player, e.message));
         });
