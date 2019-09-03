@@ -2,80 +2,107 @@ import * as types from './actionTypes';
 import config from '../globals';
 import axios from 'axios';
 
-
-//GET PLAYERS
-export function getPlayersSuccess(players, leagueName){
-    return {type: types.GET_PLAYERS_SUCCESS, players, leagueName};
+export function getPositionsSuccess(data){
+    return {type: types.GET_POSITIONS_SUCCESS, data};
 }
 
-export function getPlayersFailure(error){
-    return {type: types.GET_PLAYERS_FAILURE, error};
+export function getPositionsFailure(error){
+    return {type: types.GET_POSITIONS_FAILURE, error};
 }
 
-export function getPlayers(leagueName){
-    let url = `${config.baseApiUri}/api/getPlayers`;
-    let options = {
-        league: leagueName
-    }
+export function getPositions(_isDraft){
+    let url = `${config.baseApiUri}/api/getPositions`,
+    options = {
+        isDraft: _isDraft
+    };
+   
     return function(dispatch){
-        return axios.post(url, options)
-        .then(res => {
-            let dispatchFn = res.data.data.error ? getPlayersFailure(res.data.data.error) : getPlayersSuccess(res.data.data, leagueName);
-            dispatch(dispatchFn);
-        }).catch(e => {
-            dispatch(getPlayersFailure(e.message));
-        });
+        return new Promise((resolve, reject)=>{
+            axios.post(url, options)
+            .then(res => {
+                let _data = res.data;
+                if(_data.failed){
+                    dispatch(getPositionsFailure(_data.failed));
+                    reject(_data.failed)
+                }else{
+                    dispatch(getPositionsSuccess(_data));
+                    resolve(_data)
+                }
+            }).catch(e => {
+                dispatch(getPositionsFailure(e));
+                reject(e)
+            });
+        })
     }
 }
 
-//DRAFT PLAYER
-export function draftPlayerSuccess(player){
-    return {type: types.DRAFT_PLAYER_SUCCESS, player};
+export function getNFLTeamsSuccess(data){
+    return {type: types.GET_NFL_TEAMS_SUCCESS, data};
 }
 
-export function draftPlayerFailure(player, error){
-    return {type: types.DRAFT_PLAYER_FAILURE, player, error};
+export function getNFLTeamsFailure(error){
+    return {type: types.GET_NFL_TEAMS_FAILURE, error};
 }
 
-
-export function draftPlayer(player){
-    let url = `${config.baseApiUri}/api/draftPlayer`;
-    let options = {
-        draftOptions: player
-    }
+export function getNFLTeams(_isDraft){
+    let url = `${config.baseApiUri}/api/getNFLTeams`,
+    options = {
+        isDraft: _isDraft
+    };
+   
     return function(dispatch){
-        return axios.post(url, options)
-        .then(res => {
-            let dispatchFn = res.data.data.error ? draftPlayerFailure(player, res.data.data.error) : draftPlayerSuccess(player);
-            dispatch(dispatchFn);
-            return (res.data.data);
-        }).catch(e => {
-            dispatch(draftPlayerFailure(player, e.message));
-        });
+        return new Promise((resolve, reject)=>{
+            axios.post(url, options)
+            .then(res => {
+                let _data = res.data;
+                if(_data.failed){
+                    dispatch(getNFLTeamsFailure(_data.failed));
+                    reject(_data.failed)
+                }else{
+                    dispatch(getNFLTeamsSuccess(_data));
+                    resolve(_data)
+                }
+            }).catch(e => {
+                console.log(e);
+                dispatch(getNFLTeamsFailure(e));
+                reject(e)
+            });
+        })
     }
 }
 
-//UNDRAFT PLAYER
-export function unDraftPlayerSuccess(player){
-    return {type: types.UNDRAFT_PLAYER_SUCCESS, player};
+export function getDraftedPlayersSuccess(data){
+    return {type: types.DRAFT_PLAYER_LIST_SUCCESS, data};
 }
 
-export function unDraftPlayerFailure(error){
-    return {type: types.UNDRAFT_PLAYER_FAILURE, error};
+export function getDraftedPlayersFailure(error){
+    return {type: types.DRAFT_PLAYER_LIST_FAILURE, error};
 }
 
-export function unDraftPlayer(player){
-    let url = `${config.baseApiUri}/api/unDraftPlayer`;
-    let options = {
-        unDraftOptions: player
-    }
+export function getDraftedPlayers(_leagueId, _memberId){
+    let url = `${config.baseApiUri}/api/getDraftedPlayers`,
+    options = {
+        leagueId: _leagueId,
+        memberId: _memberId
+    };
+   
     return function(dispatch){
-        return axios.post(url, options)
-        .then(res => {
-            let dispatchFn = res.data.data.error ? unDraftPlayerFailure(res.data.data.error) : unDraftPlayerSuccess(player);
-            dispatch(dispatchFn);
-        }).catch(e => {
-            dispatch(unDraftPlayerFailure(e.message));
-        });
+        return new Promise((resolve, reject)=>{
+            axios.post(url, options)
+            .then(res => {
+                let _data = res.data;
+                if(_data.failed){
+                    dispatch(getDraftedPlayersFailure(_data.failed));
+                    reject(_data.failed)
+                }else{
+                    dispatch(getDraftedPlayersSuccess(_data));
+                    resolve(_data)
+                }
+            }).catch(e => {
+                console.log(e);
+                dispatch(getDraftedPlayersFailure(e));
+                reject(e)
+            });
+        })
     }
 }

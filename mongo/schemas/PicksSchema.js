@@ -1,12 +1,12 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-var PicksSchema = new Schema({
-    league: { type: String, required: true},
-    teamName: { type: String, required: true},
-    playerId: { type: String, required: true },
-    roundDraft: { type: Number, required: false },
-    overall: { type: Number, required: false }
+const picksSchema = new Schema({
+    leagueId: { type: Number, required: true, select: false},
+    memberId: { type: String, required: true, select: false},
+    playerId: { type: Number, required: true},
+    round: { type: Number, required: true},
+    overall: { type: Number, required: true}
 });
 
-module.exports = mongoose.model('Picks', PicksSchema);
+module.exports = mongoose.model('Picks', picksSchema);

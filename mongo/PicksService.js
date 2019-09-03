@@ -1,118 +1,86 @@
 Object.defineProperty(exports, "__esModule", { value: true });
-var Pick = require('./schemas/PicksSchema');
-var _ = require('lodash');
+const Picks = require('./schemas/PicksSchema');
+const _ = require('lodash');
 
-class PicksSchemaService{
+class PicksService{
 
-    Create(pickObject){
+    TryCreate(pickModel){
         return new Promise((resolve, reject) => {
-            this.GetOne(pickObject)
-            .then((existingPick) => {
-                if(!existingPick){
-                    this.SaveSchema(pickObject).then((savedPickObject) => {
-                        resolve(savedPickObject);
-                    }).catch((saveErr) => {
+            this.GetUniquePick(pickModel)
+            .then((existingModel)=>{
+                if(!existingModel){
+                    this.SaveSchema(pickModel).then((savedPickModel) =>{
+                        resolve(savedPickModel);
+                    }).catch((saveErr)=>{
                         reject(saveErr);
                     });
                 }else{
-                    reject({message:"Pick already Exists"});
+                    reject({message: "pick already selected"});
                 }
-            }).catch((pickErr) => {
-                reject(pickErr);
+            }).catch((getErr)=>{
+                reject(getErr);
             });
         });
     }
 
-    GetAll(){
-        return new Promise((resolve, reject)=>{
-            Pick.find({}, (err, picks) => {
+    GetUniquePick(_pickModel){
+        return new Promise((resolve, reject) => {
+            Picks.findOne({leagueId: _pickModel.leagueId, memberId: _pickModel.memberId, playerId: _pickModel.playerId}, (err, pickModel) => {
                 if(err){
-                    reject(err); 
-                }else{    
-                    let picksMap = {};
-                    let count = 0;
-                    _.each(picks, (pick)=>{
-                        let id = `pick_${count}`;
-                        let p = pick._doc;
-                        picksMap[id] = p;
-                        count++;
+                    reject(err);
+                }else{
+                    let _model = pickModel ? pickModel._doc : null;
+                    resolve(_model);
+                }
+            });
+        });
+    }
+
+    GetPicksByLeague(_leagueId){
+        return new Promise((resolve, reject) => {
+            Picks.find({leagueId: _leagueId}, (err, pickModel) => {
+                if(err){
+                    reject(err);
+                }else{
+                    let model = {};
+                    _.each(pickModel, (m)=>{
+                        model[m._doc.playerId] = m._doc;
                     });
-        
-                    resolve(picksMap);  
+                    resolve(model);
                 }
             });
         });
     }
 
-    GetOne(pickObject){
-        return new Promise((resolve, reject)=>{
-            Pick.findOne({league: pickObject.league, teamName: pickObject.teamName, roundDraft: pickObject.roundDraft}, (err, pick)=>{
+
+    GetPicksByMember(_pickModel){
+        return new Promise((resolve, reject) => {
+            Picks.find({leagueId: pickModel.leagueId, memberId: pickModel.memberId}, (err, pickModel) => {
                 if(err){
                     reject(err);
                 }else{
-                    let _p = pick ? pick._doc : null;
-                    resolve(_p);
+                    resolve(
+                        _.map(pickModel, (m)=>{
+                            return m._doc;
+                        })
+                    );
                 }
             });
         });
     }
 
-    GetAllByTeam(team){
-        return new Promise((resolve, reject)=>{
-            Pick.find({teamName:team}, (err, picks) => {
-                if(err){
-                    reject(err);  
-                }
-
-                let picksMap = {};  
-                _.each(picks, (pick)=>{
-                    let id = `round_${pick.roundDraft}`;
-                    let p = pick._doc;
-                    picksMap[id] = p;
-                });
-
-                resolve(picksMap);  
-            });
-        });
-    }
-
-    SaveSchema(pickObject){
-        return new Promise((resolve, reject)=>{
-            let newPickSchema = new Pick(pickObject);
-            newPickSchema.save((err) =>{
+    SaveSchema(pickModel){
+        return new Promise((resolve, reject) => {
+            let newSchema = new Picks(pickModel);
+            newSchema.save((err) =>{
                 if(err){
                     reject(err);
                 }else{
-                    resolve(pickObject)
+                    resolve(pickModel);
                 }
             });
         });
     }
-
-    Delete(deletePick){
-        return new Promise((resolve, reject)=>{
-            Pick.remove({league: deletePick.league, playerId: deletePick.playerId}, (err, res)=>{
-                if(err){
-                    reject(err);
-                }else{
-                    resolve(res);
-                }
-            })
-        });
-    }
-
-    DeleteByLeague(leagueName){
-        return new Promise((resolve, reject)=>{
-            Pick.remove({league: leagueName}, (err, res)=>{
-                if(err){
-                    reject(err);
-                }else{
-                    resolve(res);
-                }
-            })
-        });
-    }
-
 }
 
-exports.PicksSchemaService = new PicksSchemaService();
+exports.PicksService = new PicksService();

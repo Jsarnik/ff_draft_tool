@@ -159,32 +159,32 @@ div.button {
     height: 25px;
     overflow: hidden; }
     .team-pickboard .flex-item.rb {
-      background-color: rgba(25, 0, 255, 0.664);
+      background-color: #bfb8ff;
       box-shadow: inset 1px 0px 10px 5px #1900ff;
       border-color: #1900ff;
       color: #fff; }
     .team-pickboard .flex-item.wr {
-      background-color: rgba(0, 247, 255, 0.616);
+      background-color: rgba(189, 253, 255, 0.616);
       box-shadow: inset 1px 0px 10px 5px #00f7ff;
       border-color: #00f7ff;
       color: #000; }
     .team-pickboard .flex-item.k {
-      background-color: rgba(255, 0, 234, 0.692);
+      background-color: rgba(255, 188, 249, 0.692);
       box-shadow: inset 1px 0px 10px 5px #ff00ea;
       border-color: #ff00ea;
       color: #000; }
     .team-pickboard .flex-item.dst {
-      background-color: rgba(43, 117, 0, 0.658);
+      background-color: rgba(207, 255, 180, 0.658);
       box-shadow: inset 1px 0px 10px 5px #2b7500;
       border-color: #2b7500;
       color: #fff; }
     .team-pickboard .flex-item.qb {
-      background-color: rgba(250, 205, 3, 0.616);
+      background-color: rgba(255, 241, 179, 0.616);
       box-shadow: inset 1px 0px 10px 5px #facd03;
       border-color: #facd03;
       color: #000; }
     .team-pickboard .flex-item.te {
-      background-color: rgba(255, 115, 0, 0.651);
+      background-color: rgba(255, 215, 183, 0.651);
       box-shadow: inset 1px 0px 10px 5px #ff7300;
       border-color: #ff7300;
       color: #fff; }
@@ -391,5 +391,41 @@ div.button {
     font-size: 1em; }
   100% {
     font-size: 2em; } }
+.ant-tag.rb {
+  background-color: #bfb8ff;
+  border-color: #1900ff;
+  color: #fff; }
+.ant-tag.wr {
+  background-color: rgba(189, 253, 255, 0.616);
+  border-color: #00f7ff;
+  color: #000; }
+.ant-tag.k {
+  background-color: rgba(255, 188, 249, 0.692);
+  border-color: #ff00ea;
+  color: #000; }
+.ant-tag.dst {
+  background-color: rgba(207, 255, 180, 0.658);
+  border-color: #2b7500;
+  color: #fff; }
+.ant-tag.qb {
+  background-color: rgba(255, 241, 179, 0.616);
+  border-color: #facd03;
+  color: #000; }
+.ant-tag.te {
+  background-color: rgba(255, 215, 183, 0.651);
+  border-color: #ff7300;
+  color: #fff; }
+
+.snake-card.selected {
+  background: orange; }
+
+.steps-content {
+  margin-top: 16px;
+  border: 1px dashed #e9e9e9;
+  border-radius: 6px;
+  background-color: #fafafa;
+  min-height: 200px;
+  text-align: center;
+  padding-top: 80px; }
 
 /*# sourceMappingURL=main.css.map */

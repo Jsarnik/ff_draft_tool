@@ -11,7 +11,9 @@
             "program": "${workspaceRoot}/server.js",
             "internalConsoleOptions": "openOnSessionStart",
             "env": {
-                "NODE_ENV": "localhost"
+                "NODE_ENV": "localhost",
+                "espnS2": "AECBSsTqgmljXsxN3gBY60qs%2BYinq8sV4nQgl9dzsoAxbWovpLZG%2BnPXzuVUTpTWs%2FwU6n6qgx0%2FaOgy3ew78OifpVbYmNSvvDw5o0bFZL69DMLPD3JGnXWa3A9DPPXsMiJ6jOevc73%2BQfIr3lnvJRnZRhcYEzuPWwR%2BItU%2F1v1f7sVmZ0hUd0WVupSLuIIfp6Hp9nXZW3pIO4jjcB%2B3f87gKZXlEyNKrAMqrDicLUX6ERE27KWCBDaT2Tv59785fJo%3D",
+                "SWID": "{F2D6BEDA-B707-49EE-96BE-DAB70799EEE0}"
             },
             "outputCapture": "std"
         },

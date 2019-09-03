@@ -1,8 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var express = require('express');
+const express = require('express'),
+Constants = require('../Constants'),
+ _ = require('lodash'),
+ draftService = require('../mongo/DraftSettingsService'),
+ picksService = require('../mongo/PicksService'),
+ draftSetup = require('./DraftSetup'),
+ weeklyreportCard = require('./WeeklyReportCard');
+
 var playersService = require('../mongo/PlayersService');
-var picksService = require('../mongo/PicksService');
 var teamsService = require('../mongo/TeamsService');
 var leagueService = require('../mongo/LeagueService');
 var importService = require('../ImportService');
@@ -29,6 +35,150 @@ function configure(app) {
     router.post('/getPlayers', getPlayers);
     router.post('/resetDB', resetDB);
     router.get('/downloadDraft', downloadDraft);
+
+    // NEW
+    router.post('/weeklyReportCard', weeklyReportCard);
+    router.post('/privateLeague', privateLeague);
+    router.post('/getPositions', getPositions);
+    router.post('/getNFLTeams', getNFLTeams);
+    router.post('/getDraftSettings', getDraftSettings);
+    router.post('/setDraftPick', setDraftPick);
+    router.post('/setDraftOrder', setDraftOrder);
+    router.post('/getDraftedPlayers', getDraftedPlayers);
+
+    function weeklyReportCard(req, res, next){
+        try{
+            const cookies = req.body.cookies || {
+                espnS2: process.env.espnS2,
+                SWID: process.env.SWID
+            };
+            weeklyreportCard.WeeklyReportCardService.WeeklyReportCard(req.body.leagueId, cookies)
+            .then(weeklyCardRes => {
+                res.json(weeklyCardRes);
+            })
+            .catch(weeklyCardErr => {
+                res.json({failed: weeklyCardErr});
+            });   
+        }catch(ex){
+            res.status(500);
+            res.json({failed: ex});
+        }
+    };
+
+    function privateLeague(req, res, next){
+        try{
+            draftSetup.DraftSetup.InitializeESPNData(req.body.leagueId, req.body.cookies)
+            .then(draftRes => {
+                res.json(draftRes);
+            })
+            .catch(draftErr => {
+                res.json({failed: draftErr});
+            });
+        }catch(ex){
+            res.status(500);
+            res.json({failed: ex});
+        }
+    };
+
+    function setDraftOrder(req, res, next){
+        res.status(200);
+        draftService.DraftSettingsService.UpdateByLeague(req.body.draftModel, req.body.leagueId, req.body.memberId).then(draftModelRes => {
+            draftModelRes.fullDraftOrder = draftSetup.DraftSetup.CalculateDraftOrder(draftModelRes.draftOrder);
+            res.json(draftModelRes);
+        }).catch(err => {
+            res.json({failed: err})
+        });
+    }
+
+    function getDraftSettings(req, res, next){
+        res.status(200);
+        draftService.DraftSettingsService.GetByLeague(req.body.leagueId, req.body.memberId).then(draftModelRes => {
+            draftModelRes.fullDraftOrder = draftSetup.DraftSetup.CalculateDraftOrder(draftModelRes.draftOrder);
+            res.json(draftModelRes);
+        }).catch(err => {
+            res.json({failed: err})
+        });
+    }
+
+    function getDraftedPlayers(req, res, next){
+        res.status(200);
+        picksService.PicksService.GetPicksByLeague(req.body.leagueId).then(picksModelRes => {
+            res.json(picksModelRes);
+        }).catch(err => {
+            res.json({failed: err})
+        });
+    }
+
+    function getPositions(req, res, next){
+        res.status(200);
+        res.json(req.body.isDraft ? Constants.draftPosDropDown :  Constants.slotCategoryIdToPositionMap);
+    }
+
+    function getNFLTeams(req, res, next){
+        res.status(200);
+        const nflTeamListMap = req.body.isDraft ? Constants.nflTeamDropDown : Constants.nflTeamIdToNFLTeam;
+        let nflTeamsMap = {};
+
+        _.each(nflTeamListMap, (teamName,i) => {
+            nflTeamsMap[i] = {
+                name: teamName,
+                abbr: Constants.nflTeamIdToNFLTeamAbbreviation[i]
+            }
+        });
+        res.json(nflTeamsMap);
+    }
+
+    function setDraftPick(req, res, next){
+        res.status(200);
+        let pickModel = req.body.pickModel;
+        picksService.PicksService.TryCreate(pickModel)
+        .then(pickModelRes => {
+            draftService.DraftSettingsService.GetByLeague(pickModel.leagueId, pickModel.memberId)
+            .then(draftModelRes => {     
+                draftModelRes.round+=1;
+                draftModelRes.overall+=1;
+                draftModelRes.currentPickTeamId = draftModelRes.snakeOrder[draftModelRes.overall-1];
+
+                draftService.DraftSettingsService.UpdateByLeague(draftModelRes, pickModel.leagueId, pickModel.memberId)
+                .then(updateDraftModelRes => {
+                    res.json(updateDraftModelRes);
+                })
+                .catch(updateDraftModelErr => {
+                    res.json({failed: updateDraftModelErr});
+                })
+            })
+            .catch(draftModelErr => {
+                res.json({failed: draftModelErr});
+            });
+        })
+        .catch(pickModelErr => {
+            res.json({failed: pickModelErr});
+        });
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     function uploadFile(req, res, next){
         let imageFile = req.files.file;
