@@ -6,7 +6,7 @@
     "node": "10.11.0"
   },
   "scripts": {
-    "start": "NODE_ENV=localhost node server.js",
+    "start": "NODE_ENV=production node server.js",
     "profile": "NODE_ENV=localhost node --prof server.js",
     "prod": "NODE_ENV=production forever server.js"
   },
