@@ -39,7 +39,7 @@ function haltOnTimedout(req, res, next){
 
 var httpServer = http.createServer(app);
 
-var httpPort = process.env.PORT || 3002;
+var httpPort = process.env.PORT || 3001;
 
 httpServer.listen(httpPort, (err) =>{
     if(err){
