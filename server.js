@@ -13,6 +13,7 @@ const cleanupService = require('./CleanupService');
 mongoConfig.MongoConfiguration.Initialize();
 let mongoDb = mongoConfig.MongoConfiguration.MongoDb();
 mongoDb.on('error', (err)=>{
+    console.log('mongodb connection err' + err.toString())
     Logger.NodeLogger.log({
         level : 'error',
         message: 'Mongo Connection Error: ' + err.message.toString()
@@ -35,7 +36,7 @@ app.use((req, res, next)=> {
 app.use(express.static(path.join(__dirname,'/app/build')));
 routes.configure(app);
 app.get('*', function(req, res) {
-  res.sendFile(path.join(__dirname,'/app/build/index.html'));
+  res.sendfile(path.join(__dirname,'/app/build/index.html'));
 });
 
 function haltOnTimedout(req, res, next){
