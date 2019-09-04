@@ -24,11 +24,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(timeout(120000));
 app.use(haltOnTimedout);
-
-app.use(express.static(__dirname + '/app'));
+app.use(express.static(__dirname + '/views'));
 
 app.get('/', (req, res) =>{
-    res.sendfile('app/public/index.html');
+    res.sendfile('index.html');
 });
 
 routes.configure(app);
