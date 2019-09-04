@@ -24,13 +24,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(timeout(120000));
 app.use(haltOnTimedout);
-app.use(express.static(__dirname + '/views'));
 
-app.get('/', (req, res) =>{
-    res.sendfile('index.html');
-});
-
+app.use(express.static(path.join(__dirname,'/app/build')));
 routes.configure(app);
+app.get('*', function(req, res) {
+  res.sendfile(path.join(__dirname,'/app/build/index.html'));
+});
 
 function haltOnTimedout(req, res, next){
   if (!req.timedout) next();
