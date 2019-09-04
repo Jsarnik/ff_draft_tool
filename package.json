@@ -1,6 +1,6 @@
 {
   "name": "DraftTool",
-  "description": "Fantasy Football Draft Tool",
+  "description": "ESPN Fantasy Tool",
   "main": "server.js",
   "engines": {
     "node": "10.11.0"
