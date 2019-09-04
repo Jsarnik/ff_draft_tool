@@ -10,15 +10,15 @@ const Logger = require('./Logger');
 const app = express();
 const cleanupService = require('./CleanupService');
 
-mongoConfig.MongoConfiguration.Initialize();
-let mongoDb = mongoConfig.MongoConfiguration.MongoDb();
-mongoDb.on('error', (err)=>{
-    console.log('mongodb connection err' + err.toString())
-    Logger.NodeLogger.log({
-        level : 'error',
-        message: 'Mongo Connection Error: ' + err.message.toString()
-    });
-});
+// mongoConfig.MongoConfiguration.Initialize();
+// let mongoDb = mongoConfig.MongoConfiguration.MongoDb();
+// mongoDb.on('error', (err)=>{
+//     console.log('mongodb connection err' + err.toString())
+//     Logger.NodeLogger.log({
+//         level : 'error',
+//         message: 'Mongo Connection Error: ' + err.message.toString()
+//     });
+// });
 
 app.set('view engine', 'ejs');
 app.use(cors());
