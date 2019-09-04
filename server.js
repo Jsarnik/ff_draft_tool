@@ -32,10 +32,10 @@ app.use((req, res, next)=> {
     next();
 });
 
-app.use(express.static(path.join(__dirname,'/build')));
+app.use(express.static(path.join(__dirname,'./app/build')));
 routes.configure(app);
 app.get('*', function(req, res) {
-  res.sendfile(path.join(__dirname,'/build/index.html'));
+  res.sendFile(path.join(__dirname,'./app/build/index.html'));
 });
 
 function haltOnTimedout(req, res, next){
