@@ -1,16 +1,17 @@
-var express = require('express');
-var http = require('http');
-var bodyParser = require('body-parser');
-var timeout = require('connect-timeout');
-var mongoConfig = require('./mongo/MongoConfig');
-var routes = require('./api/routes');
-var cors = require('cors');
-var Logger = require('./Logger');
-var app = express();
-var cleanupService = require('./CleanupService');
+const express = require('express');
+const http = require('http');
+const path = require('path');
+const bodyParser = require('body-parser');
+const timeout = require('connect-timeout');
+const mongoConfig = require('./mongo/MongoConfig');
+const routes = require('./api/routes');
+const cors = require('cors');
+const Logger = require('./Logger');
+const app = express();
+const cleanupService = require('./CleanupService');
 
 mongoConfig.MongoConfiguration.Initialize();
-var mongoDb = mongoConfig.MongoConfiguration.MongoDb();
+let mongoDb = mongoConfig.MongoConfiguration.MongoDb();
 mongoDb.on('error', (err)=>{
     Logger.NodeLogger.log({
         level : 'error',
@@ -35,9 +36,8 @@ function haltOnTimedout(req, res, next){
   if (!req.timedout) next();
 }
 
-var httpServer = http.createServer(app);
-
-var httpPort = process.env.PORT || 3001;
+let httpServer = http.createServer(app);
+let httpPort = process.env.PORT || 3001;
 
 httpServer.listen(httpPort, (err) =>{
     if(err){
