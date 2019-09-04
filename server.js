@@ -10,15 +10,15 @@ const Logger = require('./Logger');
 const app = express();
 const cleanupService = require('./CleanupService');
 
-// mongoConfig.MongoConfiguration.Initialize();
-// let mongoDb = mongoConfig.MongoConfiguration.MongoDb();
-// mongoDb.on('error', (err)=>{
-//     console.log('mongodb connection err' + err.toString())
-//     Logger.NodeLogger.log({
-//         level : 'error',
-//         message: 'Mongo Connection Error: ' + err.message.toString()
-//     });
-// });
+mongoConfig.MongoConfiguration.Initialize();
+let mongoDb = mongoConfig.MongoConfiguration.MongoDb();
+mongoDb.on('error', (err)=>{
+    console.log('mongodb connection err' + err.toString())
+    Logger.NodeLogger.log({
+        level : 'error',
+        message: 'Mongo Connection Error: ' + err.message.toString()
+    });
+});
 
 app.set('view engine', 'ejs');
 app.use(cors());
@@ -33,10 +33,10 @@ app.use((req, res, next)=> {
     next();
 });
 
-app.use(express.static(path.join(__dirname,'/build')));
+app.use(express.static(path.join(__dirname,'/app/build')));
 routes.configure(app);
 app.get('*', function(req, res) {
-  res.sendfile(path.join(__dirname,'/build/index.html'));
+  res.sendFile(path.join(__dirname, 'app', 'build', 'index.html'));
 });
 
 function haltOnTimedout(req, res, next){
