@@ -625,4 +625,24 @@ div.button{
     min-height: 200px;
     text-align: center;
     padding-top: 80px;
+    height: 500px;
+}
+
+.ant-menu.ant-menu-dark .ant-menu-item-selected, .ant-menu-submenu-popup.ant-menu-dark .ant-menu-item-selected{
+    background-color: #b10000;
+}
+
+.card-no-padding{
+    .ant-card-body{
+        padding: 0;
+    }
+}
+
+td, .ant-table-thead tr th{
+    &.bold{
+        font-weight: bold;
+    }
+    &.right{
+        text-align: right;
+    }
 }

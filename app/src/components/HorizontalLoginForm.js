@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as espnActions from '../actions/espnActions';
 import * as _ from 'lodash';
-import { Form, Icon, Input, Button, Steps, Card } from 'antd';
-
+import { Alert, Form, Icon, Input, Button, Steps, Card, Select, Result, Spin } from 'antd';
+const { Option } = Select;
 const { Step } = Steps;
 const _src = `${process.env.PUBLIC_URL}/images/`;
 const imageStyle = {
@@ -14,14 +17,14 @@ const steps = [
   {
     title: 'Login',
     content: (
-      <div>Login to <a href="https://www.espn.com/fantasy/" target="_blank">https://www.espn.com/fantasy</a>.</div>
+      <h3>Login to <a href="https://www.espn.com/fantasy/" target="_blank">https://www.espn.com/fantasy</a>.</h3>
     )
   },
   {
     title: 'Inspect',
     content: (
       <div>
-        <div>Right click to inspect.</div>
+        <h3>Right click to inspect.</h3>
         <img alt="inspect" style={imageStyle} src={`${_src}/inspect.png`}/>
       </div>
     )
@@ -30,7 +33,7 @@ const steps = [
     title: 'Applications',
     content: (
       <div>
-        <div>In console, go to Applictaions tab</div>
+        <h3>Click on 'Applictaions' tab</h3>
         <img alt="application" style={imageStyle} src={`${_src}/application.png`}/>
       </div>
     ),
@@ -39,7 +42,7 @@ const steps = [
     title: 'Cookies',
     content: (
       <div>
-        <div>Go to Storage -> Cookies Folder -> https://www.espn.com</div>
+        <h3>Under Storage -> Cookies Folder -> Click on https://www.espn.com</h3>
         <img alt="cookies" style={imageStyle} src={`${_src}/cookies.png`}/>
       </div>
     ),
@@ -48,8 +51,8 @@ const steps = [
     title: 'SWID',
     content: (
       <div>
-        <div>1. Search for SWID key</div>
-        <div>2. Copy Value and enter below (including brackets {"{}"})</div>
+        <h3>1. Search for SWID key</h3>
+        <h3>2. Copy Value and enter above (including brackets {"{}"})</h3>
         <img alt="search_swid" style={imageStyle} src={`${_src}/search_swid.png`}/>
       </div>
     )
@@ -58,8 +61,8 @@ const steps = [
     title: 'espn_s2',
     content: (
       <div>
-        <div>1. Search for espn_s2 key</div>
-        <div>2. Copy Value and enter below</div>
+        <h3>1. Search for espn_s2 key</h3>
+        <h3>2. Copy Value and enter above</h3>
         <img alt="search_s2" style={imageStyle} src={`${_src}/search_s2.png`}/>
       </div>
     )
@@ -68,8 +71,18 @@ const steps = [
     title: 'League ID',
     content: (
       <div>
-        Find league ID here
+        <h3>Go to your fantasy team page.</h3>
+        <h3>Find leagueId in the URL (Web Address).</h3>
+        <h3>Enter leagueId above.</h3>
         <img alt="league_id" style={imageStyle} src={`${_src}/league_id.png`}/>
+      </div>
+    )
+  },
+  {
+    title: 'Submit',
+    content: (
+      <div>
+        Click 'Submit'.
       </div>
     )
   }
@@ -83,6 +96,7 @@ class HorizontalLoginForm extends Component {
   constructor(props){
     super();
     this.state = {
+      isLoading: false,
       current: 0,
       fields: {
         leagueId: {
@@ -99,38 +113,49 @@ class HorizontalLoginForm extends Component {
   }
 
   componentDidMount() {
-    this.getCookies();
+    this.props.espnActions.getESPNUser().then(espnUserDataRes => {
+    }).catch(espnUserErr => {
+      console.log(espnUserErr);
+    });
   }
 
-  getCookies = () => {
-    let cookieArray = document.cookie.split(';'),
-    fields ={};
-
-    _.each(cookieArray, cookie => {
-        let [key, value] = cookie.split('=');
-        fields[key.trim()] = value;
-    });
-
-    this.setState({
-      fields: {
-        leagueId: {
-          value: fields.leagueId || ""
-        },
-        SWID: {
-          value: fields.SWID || ""
-        },
-        espnS2: {
-          value: fields.espnS2 || ""
+  componentDidUpdate = (prevProps) => {
+    if(this.props.user && this.props.user.cookies !== prevProps.user.cookies){
+      this.setState({
+        fields: {
+          leagueId: {
+            value: this.props.user.cookies.leagueId || ""
+          },
+          SWID: {
+            value: this.props.user.cookies.SWID || ""
+          },
+          espnS2: {
+            value: this.props.user.cookies.espnS2 || ""
+          }
         }
-      }
-    });
+      });
+    }
   }
 
   handleSubmit = (values) => {
-    _.each(values, (val, key) => {
-      document.cookie = `${key}=${val}`;
+    this.props.espnActions.setCookies(values);
+    this.setState({
+      isLoading: true
     });
-    this.props.history.push(`/${this.props.match.params.redirect || 'report'}`);
+    this.props.espnActions.getLeagueData()
+        .then(leagueDataRes => {
+            this.setState({
+              isLoading: false,
+              isLoginResult: true,
+              isLoginSuccess: true
+            });
+        }).catch(leagueInfoErr => {
+          this.setState({
+            isLoading: false,
+            isLoginResult: true,
+            isLoginSuccess: false
+          });
+        })
   };
 
   handleFormChange = changedFields => {
@@ -149,32 +174,99 @@ class HorizontalLoginForm extends Component {
     this.setState({ current });
   }
 
+  handleSelectChange = (value) => {
+    if(this.props.user.cookies.leagueId !== value){
+      let cookieClone = _.cloneDeep(this.props.user.cookies);
+      cookieClone.leagueId = value;
+      this.handleSubmit(cookieClone);
+    }
+  }
+
+  handleSuccessReportClick = () => {
+    this.props.history.push(`/report/${this.props.user.cookies.leagueId}`)
+  }
+
+  handleShowStepsClick = () => {
+    this.setState({
+      isLoginResult: false
+    });
+  }
+
   render() {
     const { fields } = this.state;
     const { current } = this.state;
+    const _dropdown = this.props.user && this.props.user.espnUser ? this.props.user.espnUser.leaguesModel : null;
+    const _defaultDropDown = _dropdown ? _.find(this.props.user.espnUser.leaguesModel, {'value': parseInt(this.props.user.cookies.leagueId)}) || {} : null;
 
     return (
-      <div style={{marginTop: 50}}>
-        <Steps current={current}>
-          {steps.map(item => (
-            <Step key={item.title} title={item.title} />
-          ))}
-        </Steps>
-        <div className="steps-content">{steps[current].content}</div>
-        <div className="steps-action">
-          {current < steps.length - 1 && (
-            <Button type="primary" onClick={() => this.next()}>
-              Next
-            </Button>
-          )}
-          {current > 0 && (
-            <Button style={{ marginLeft: 8 }} onClick={() => this.prev()}>
-              Previous
-            </Button>
-          )}
+      <div>
+        {_dropdown ? 
+            <div>
+              <label>Default Team: </label>
+              <Select defaultValue={_defaultDropDown.label} style={{ width: 400, marginTop: 25 }} onChange={this.handleSelectChange}>
+                {
+                  _.map(_dropdown, team => {
+                    return (
+                      <Option disabled={team.value == this.props.user.cookies.leagueId} key={team.value} value={team.value}>{team.label}</Option>
+                    )
+                  })
+                }
+              </Select>
+          </div>
+        : null}
+
+        <Spin spinning={this.state.isLoading} >
+          <Card style={{margin: '25px 0', textAlign: 'center'}}>
+            <WrappedHorizontalLoginForm {...fields} onChange={this.handleFormChange} onSubmit={this.handleSubmit}></WrappedHorizontalLoginForm>
+          </Card>
+        </Spin>
+
+        <div style={{width: '50%', margin: '0 auto'}}>
+          <Alert
+            message="Connecting to ESPN Private League Info"
+            description={`ESPN does not have a direct login, you need to enter two values to connect to your private leagues. Please follow the steps below. *Note - if you are in multiple leagues, you ONLY need to change the leagueId to see other league results.`}
+            type="info"
+            showIcon
+          />
         </div>
-        <Card>
-          <WrappedHorizontalLoginForm {...fields} onChange={this.handleFormChange} onSubmit={this.handleSubmit}></WrappedHorizontalLoginForm>
+
+
+        <Card style={{marginTop: 25}}>
+          {!this.state.isLoginResult ?
+            <div>
+              <div className="steps-action" style={{padding: 10, textAlign: 'center'}}>
+                {current > 0 && (
+                  <Button style={{ marginRight: 10 }} onClick={() => this.prev()}>
+                    Previous
+                  </Button>
+                )}
+                {current < steps.length - 1 && (
+                  <Button type="primary" onClick={() => this.next()}>
+                    Next
+                  </Button>
+                )}
+              </div>
+              <Steps current={current}>
+                {steps.map(item => (
+                  <Step key={item.title} title={item.title} />
+                ))}
+              </Steps>
+              <div className="steps-content">{steps[current].content}</div>
+            </div>
+          :
+            <Result
+                status={this.state.isLoginSuccess ? 'success' : 'error'}
+                title={this.state.isLoginSuccess ? 'Successfully Logged ESPN Fantasy Sports!' : 'Submission Failed.'}
+                subTitle={this.state.isLoginSuccess ? `Your League and team: ${_defaultDropDown.label}.` : 'Please check and modify the following information SWID, espnS2, leagueId.'}
+                extra={[
+                  this.state.isLoginSuccess ? 
+                  <Button onClick={this.handleSuccessReportClick} type="primary" key="report">
+                    Report Card
+                  </Button> : null,
+                  <Button onClick={this.handleShowStepsClick} key="steps">Show Steps</Button>,
+                ]}
+              />
+          }
         </Card>
       </div>
     );
@@ -184,7 +276,6 @@ class HorizontalLoginForm extends Component {
 const WrappedHorizontalLoginForm = Form.create({ 
   name: 'horizontal_login',
   onSubmit(props, values) {
-    console.log(values)
     props.form.validateFields((err, values) => {
       props.onSubmit((err, values));
     })
@@ -193,7 +284,6 @@ const WrappedHorizontalLoginForm = Form.create({
     props.onChange(changedFields);
   },
   mapPropsToFields(props) {
-    console.log(props)
     return {
       leagueId: Form.createFormField({
         ...props.leagueId,
@@ -218,7 +308,6 @@ const WrappedHorizontalLoginForm = Form.create({
       e.preventDefault();
 
       validateFields((err, values) => {
-          console.log('Received values of form: ', values);
           if (!err) {
               props.onSubmit(values); // call the parent submit
           }
@@ -265,4 +354,16 @@ const WrappedHorizontalLoginForm = Form.create({
     )
 });
 
-export default withRouter(HorizontalLoginForm);
+function mapStateToProps(state, ownProps){
+  return {
+    user: state.user
+  };
+}
+
+function mapDispatchToProps(dispatch){
+ return {
+   espnActions: bindActionCreators(espnActions, dispatch)
+ };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(HorizontalLoginForm));

@@ -5,6 +5,7 @@ import Navigation from './Navigation';
 import { Layout } from 'antd';
 import DraftLayout from './DraftLayout';
 import ReportCard from './ReportCard';
+import CookiesAlertBar from './CookiesAlertBar';
 
 const {Content, Footer } = Layout;
 
@@ -14,10 +15,12 @@ const Routes = (props) => {
             <Layout style={{minHeight:"100vh"}}>
                 <Navigation />
                 <Content style={{ padding: '0 50px', marginTop: 30 }}>
+                  <CookiesAlertBar></CookiesAlertBar>
                   <div className="content" style={{}}>
                       <Switch>
+                          <Route exact path="/" render={(props) => <HorizontalLoginForm {...props}/>} />
                           <Route exact path="/login/:redirect?" render={(props) => <HorizontalLoginForm {...props}/>} />
-                          <Route exact path="/" render={(props) => <DraftLayout {...props}/>} />
+                          <Route exact path="/draft" render={(props) => <DraftLayout {...props}/>} />
                           <Route path="/report/:leagueId?/:type?" render={(props) => <ReportCard {...props}/>} />
                           <Redirect to="/" />
                       </Switch>

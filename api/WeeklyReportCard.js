@@ -7,7 +7,7 @@ axios = require('axios'),
 Logger = require('../Logger');
 
 class WeeklyReportCardService{
-    async WeeklyReportCard(_leagueId, _cookies){
+    async WeeklyReportCard(_leagueId, _cookies, _selectedMatchupPeriod){
         try{
            let leagueInfo = await this.GetLeagueInfo(_leagueId, _cookies)
                                    .then(teamsRes => { return teamsRes })
@@ -17,7 +17,7 @@ class WeeklyReportCardService{
                 return Promise.reject(memberTeams.error);
             }
 
-           let boxScores = await this.GetBoxScores(_leagueId, _cookies, leagueInfo)
+           let boxScores = await this.GetBoxScores(_leagueId, _cookies, leagueInfo, _selectedMatchupPeriod)
                                  .then(boxScoreRes => { return boxScoreRes })
                                  .catch(boxScoreErr => { return {error: boxScoreErr} });
 
@@ -34,7 +34,7 @@ class WeeklyReportCardService{
         }
     }
 
-    async GetBoxScores(_leagueId, _cookies, _leagueInfo){
+    async GetBoxScores(_leagueId, _cookies, _leagueInfo, selectedMatchupPeriod){
         try{
             const myClient = new Client({ leagueId: _leagueId }),
             momentDate = moment();
@@ -42,8 +42,8 @@ class WeeklyReportCardService{
     
             const year = _leagueInfo.seasonId,
             periods = {
-                currentPeriod: _leagueInfo.status.currentMatchupPeriod,
-                previousPeriod: _leagueInfo.status.currentMatchupPeriod - 1 || 1
+                currentPeriod: selectedMatchupPeriod || _leagueInfo.status.currentMatchupPeriod,
+                previousPeriod: (selectedMatchupPeriod || _leagueInfo.status.currentMatchupPeriod) - 1 || 1
             }; 
           
             let currentBoxScores = await myClient.getBoxscoreForWeek({ seasonId: year, scoringPeriodId: periods.currentPeriod, matchupPeriodId: periods.currentPeriod })

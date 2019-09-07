@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require('express'),
 Constants = require('../Constants'),
  _ = require('lodash'),
+ axios = require('axios'),
  draftService = require('../mongo/DraftSettingsService'),
  picksService = require('../mongo/PicksService'),
  draftSetup = require('./DraftSetup'),
@@ -37,6 +38,7 @@ function configure(app) {
     router.get('/downloadDraft', downloadDraft);
 
     // NEW
+    router.post('/userESPNInfo', userESPNInfo)
     router.post('/weeklyReportCard', weeklyReportCard);
     router.post('/privateLeague', privateLeague);
     router.post('/getPositions', getPositions);
@@ -46,13 +48,38 @@ function configure(app) {
     router.post('/setDraftOrder', setDraftOrder);
     router.post('/getDraftedPlayers', getDraftedPlayers);
 
+    function userESPNInfo(req, res, next){
+        try{
+            const url = `https://fan.api.espn.com/apis/v2/fans/${req.body.swid}`;
+
+            axios.get(url, {})
+                .then(axiosRes => {
+                    let _data = axiosRes.data,
+                    fantasyTeams = _.filter(_data.preferences, o=>{
+                        return o.type.code.toLowerCase() === 'fantasy' && o.metaData.entry.abbrev.toLowerCase() === 'ffl';
+                    });
+                    _data.leaguesModel = _.map(fantasyTeams, meta => {
+                        return {label: `${meta.metaData.entry.entryLocation}${meta.metaData.entry.entryNickname} (${meta.metaData.entry.groups[0].groupName})`, value: meta.metaData.entry.groups[0].groupId}
+                    })
+                    res.json(_data)
+                })
+                .catch(axiosErr => {
+                    res.json({failed: axiosErr});
+                });
+
+        }catch(ex){
+            res.status(500);
+            res.json({failed: ex});
+        }
+    }
+
     function weeklyReportCard(req, res, next){
         try{
             const cookies = req.body.cookies || {
                 espnS2: process.env.espnS2,
                 SWID: process.env.SWID
             };
-            weeklyreportCard.WeeklyReportCardService.WeeklyReportCard(req.body.leagueId, cookies)
+            weeklyreportCard.WeeklyReportCardService.WeeklyReportCard(req.body.leagueId, cookies, req.body.selectedMatchupPeriod)
             .then(weeklyCardRes => {
                 res.json(weeklyCardRes);
             })

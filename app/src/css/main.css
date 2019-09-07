@@ -426,6 +426,18 @@ div.button {
   background-color: #fafafa;
   min-height: 200px;
   text-align: center;
-  padding-top: 80px; }
+  padding-top: 80px;
+  height: 500px; }
+
+.ant-menu.ant-menu-dark .ant-menu-item-selected, .ant-menu-submenu-popup.ant-menu-dark .ant-menu-item-selected {
+  background-color: #b10000; }
+
+.card-no-padding .ant-card-body {
+  padding: 0; }
+
+td.bold, .ant-table-thead tr th.bold {
+  font-weight: bold; }
+td.right, .ant-table-thead tr th.right {
+  text-align: right; }
 
 /*# sourceMappingURL=main.css.map */

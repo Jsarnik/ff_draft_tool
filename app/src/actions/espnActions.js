@@ -54,3 +54,110 @@ export function getPrivateDraft(){
         })
     }
 }
+
+export function getESPNUserSuccess(espnUser, cookies){
+    return {type: types.GET_ESPN_USER_SUCCESS, espnUser, cookies};
+}
+
+export function getESPNUserFailure(error){
+    return {type: types.GET_ESPN_USER_FAILURE, error};
+}
+
+export function getESPNUser(){
+    let cookiesObj = readCookies(),
+    url = `${config.baseApiUri}/api/userESPNInfo`,
+    options = {
+        swid: cookiesObj.SWID
+    };
+   
+    return function(dispatch){
+        return new Promise((resolve, reject)=>{
+            axios.post(url, options)
+            .then(res => {
+                let _data = res.data;
+                if(_data.failed){
+                    dispatch(getESPNUserFailure(_data.failed));
+                    reject(_data.failed);
+                }else{
+                    dispatch(getESPNUserSuccess(_data, cookiesObj));
+                    resolve(_data);
+                }
+            }).catch(e => {
+                dispatch(getESPNUserFailure(e));
+                reject(e)
+            });
+        })
+    }
+}
+
+export function getLeagueDataSuccess(reportData){
+    return {type: types.GET_LEAGUE_DATA_SUCCESS, reportData};
+}
+
+export function getLeagueDataFailure(error){
+    return {type: types.GET_LEAGUE_DATA_FAILURE, error};
+}
+
+export function getLeagueData(_matchupPeriod){
+    let cookiesObj = readCookies(),
+    url = `${config.baseApiUri}/api/weeklyReportCard`,
+    options = {
+        leagueId: cookiesObj.leagueId,
+        selectedMatchupPeriod: _matchupPeriod || null,
+        cookies: {
+            SWID: cookiesObj.SWID,
+            espnS2: cookiesObj.espnS2
+        }
+    };
+   
+    return function(dispatch){
+        return new Promise((resolve, reject)=>{
+            axios.post(url, options)
+            .then(res => {
+                let _data = res.data;
+                if(_data.failed){
+                    dispatch(getLeagueDataFailure(_data.failed));
+                    reject(_data.failed);
+                }else{
+                    dispatch(getLeagueDataSuccess(_data, cookiesObj));
+                    resolve(_data);
+                }
+            }).catch(e => {
+                dispatch(getLeagueDataFailure(e));
+                reject(e)
+            });
+        })
+    }
+}
+
+export function getCookiesSuccess(cookies){
+    return {type: 'GET_COOKIES_SUCCESS', cookies};
+}
+
+export function getCookies(){
+    return function(dispatch){
+        dispatch(getCookiesSuccess(readCookies()));
+    }
+}
+
+export function setCookies(values){
+    return function(dispatch){
+        _.each(values, (val, key) => {
+            document.cookie = `${key}=${val}; path=/`;
+        });
+        dispatch(getCookiesSuccess(values));
+    }
+}
+
+function readCookies(){
+    let cookieArray = document.cookie.split(';'),
+    cookiesModel ={};
+    
+    _.each(cookieArray, cookie => {
+        let [key, value] = cookie.split('=');
+        cookiesModel[key.trim()] = value;
+    });
+
+    return cookiesModel;
+}
+
