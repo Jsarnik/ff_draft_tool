@@ -109,14 +109,7 @@ class SnapShot extends Component {
     render() {
       const _colSpan = this.props.isMobile ? 24 : 8;
       const _defaultPeriod = this.props.espn.report ? this.props.espn.report.leagueInfo.status.currentMatchupPeriod : 1;
-      const _mobileDropdown = [
-        {label: 'Total Points', value: 'total_pts'},
-        {label: 'Win/Loss Margin', value: 'margins'},
-        {label: 'Points Left On Bench', value: 'benched_pts'},
-        {label: 'Weekly Pts Diff', value: 'weekly_diff'},
-        {label: 'Projected Rank Change', value: 'rank_change'}
-      ];
-
+      
       return this.props.espn.report ? (
         <div>
           <div style={{textAlign: 'center', padding: 20}}>

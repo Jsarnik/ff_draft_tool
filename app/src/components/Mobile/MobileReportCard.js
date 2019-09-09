@@ -30,7 +30,7 @@ const MobileReport = (props) =>{
 
 const MobileDropDown = (props) => {
     const _mobileDropdown = [
-        {label: 'Weekly Grade', value: 'wee'},
+        {label: 'Weekly Grade', value: 'weekly_grade'},
         {label: 'Total Points', value: 'total_pts'},
         {label: 'Win/Loss Margin', value: 'margins'},
         {label: 'Points Left On Bench', value: 'benched_pts'},
