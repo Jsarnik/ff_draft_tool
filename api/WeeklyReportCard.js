@@ -133,53 +133,6 @@ class WeeklyReportCardService{
 
     CompareBoxScores(currentBoxScores, previousBoxScores, teams){
         try{
-            // let reportCardModel = {
-            //     mostPointsModel: {
-            //         text: 'Most Points Scored.',
-            //         teamIds: [],
-            //         pts: Number.NEGATIVE_INFINITY,
-            //         list: {}
-            //     },
-            //     leastPointsModel:{
-            //         text: 'Least Points Scored.',
-            //         teamIds: [],
-            //         pts: Number.POSITIVE_INFINITY,
-            //         list: {}
-            //     },
-            //     narrowistMargin: {
-            //         text: 'Narrowist Win.',
-            //         margin: Number.POSITIVE_INFINITY,
-            //         teams: [],
-            //         list: {}
-            //     },
-            //     greatestMargin: {
-            //         text: 'Largest Margin Win.',
-            //         margin: Number.NEGATIVE_INFINITY,
-            //         teams: [],
-            //         list: {}
-            //     },
-            //     pointsOnBench: {
-            //         text: 'Most points left on bench.',
-            //         teamIds: [],
-            //         pts: Number.NEGATIVE_INFINITY,
-            //         list: {}
-            //     },
-            //     greatestPositivePointDiff: {
-            //         text: 'Greatest increase in points from previous week.',
-            //         teamIds: [],
-            //         scores: [],
-            //         diff: Number.NEGATIVE_INFINITY,
-            //         list: {}
-            //     },
-            //     greatestNegativePointDiff: {
-            //         text: 'Greates decrease in points from previous week.',
-            //         teamIds: [],
-            //         scores: [],
-            //         diff: Number.POSITIVE_INFINITY,
-            //         list: {}
-            //     }
-            // };
-
             let teamsModel = {},
             prevWeekTeams = previousBoxScores ? this.SplitBoxScores(previousBoxScores) : null;
 
@@ -212,35 +165,93 @@ class WeeklyReportCardService{
                         diff: matchup.homeScore - prevAwayModel.score
                     } : null
                 }
-
-                // reportCardModel.mostPointsModel = this.GetMostPoints(matchup, reportCardModel.mostPointsModel);
-                // reportCardModel.leastPointsModel = this.GetLeastPoints(matchup, reportCardModel.leastPointsModel);
-                // reportCardModel.narrowistMargin = this.GetNarrowistMargin(matchup, reportCardModel.narrowistMargin);
-                // reportCardModel.greatestMargin = this.GetGreatestMargin(matchup, reportCardModel.greatestMargin);
-                // reportCardModel.pointsOnBench = this.GetPointsOnBench(matchup.homeTeamId, matchup.homeRoster, reportCardModel.pointsOnBench);
-                // reportCardModel.pointsOnBench = this.GetPointsOnBench(matchup.awayTeamId, matchup.awayRoster, reportCardModel.pointsOnBench);
             });
 
-            // if(previousBoxScores){
-            //     let currentWeek = this.SplitBoxScores(currentBoxScores),
-            //     prevWeek = this.SplitBoxScores(previousBoxScores),
-            //     teams = _.map(currentWeek, t => {
-            //         return t = {
-            //             curr: t,
-            //             prev: prevWeek[t.teamId]
-            //         }
-            //     });
-
-            //     _.each(teams, team => {
-            //         reportCardModel.greatestPositivePointDiff = this.GetGreatestPointIncrease(team, reportCardModel.greatestPositivePointDiff);
-            //         reportCardModel.greatestNegativePointDiff = this.GetGreatestPointDecrease(team, reportCardModel.greatestNegativePointDiff);
-            //     })
-            // }
-
-            return teamsModel;
+            return this.GradeTeams(teamsModel);
         }catch(ex){
             return ex;
         }        
+    }
+
+    GradeTeams(model){
+        try{
+            const total = _.orderBy(model, ['totalPts'],['desc']);
+            const margin = _.orderBy(model, ['margin'],['desc']);
+            const bench = _.orderBy(model, ['ptsLeftOnBench'],['asc']);
+            const change = 0;
+            const espnRank = _.orderBy(model, o =>{
+                return o.info.draftDayProjectedRank - o.info.currentProjectedRank;
+            }, ['asc']);
+            const teamsCount = Object.keys(model).length;
+            const weights = {
+                total: 20,  // 20
+                margin: 20,  // 20
+                bench: 20,   // 20
+                change: 20,  // 20
+                espnRankChange: 20 // 20 
+            }
+
+            _.each(model, teamModel => {
+                let total_pts = _.findIndex([...total].reverse(), o=>{ return o.id === teamModel.id}) + 1;
+                let margins = _.findIndex([...margin].reverse(), o=>{ return o.id === teamModel.id}) + 1;
+                let benched_pts = _.findIndex([...bench].reverse(), o=>{ return o.id === teamModel.id}) + 1;
+                let weekly_diff = 0;
+                let rank_change = _.findIndex([...espnRank].reverse(), o=>{ return o.id === teamModel.id}) + 1;
+                let score = 0;
+                let grades = {
+                    total_pts: {
+                        name: 'Total Points',
+                        rank: _.findIndex(total, o=>{ return o.id === teamModel.id}) + 1,
+                        multiplier: total_pts,
+                        perc: total_pts / teamsCount,
+                        val: weights.total * (total_pts / teamsCount),
+                        total: 20
+                    },
+                    margins: {
+                        name: 'Win/Loss Margin',
+                        rank: _.findIndex(margin, o=>{ return o.id === teamModel.id}) + 1,
+                        multiplier: margins,
+                        perc: margins / teamsCount,
+                        val: weights.margin * (margins / teamsCount),
+                        total: 20
+                    },
+                    benched_pts: {
+                        name: 'Pts on Bench',
+                        rank: _.findIndex(bench, o=>{ return o.id === teamModel.id}) + 1,
+                        multiplier: benched_pts,
+                        perc: benched_pts / teamsCount,
+                        val: weights.bench * (benched_pts / teamsCount),
+                        total: 20
+                    },
+                    weekly_diff: {
+                        name: 'Weekly Pts Change',
+                        rank: 1,
+                        multiplier: 0,
+                        perc: 100,
+                        val: 20,
+                        total: 20
+                    },
+                    rank_change: {
+                        name: 'Proj Rank Change',
+                        rank:  _.findIndex(espnRank, o=>{ return o.id === teamModel.id}) + 1,
+                        multiplier: rank_change,
+                        perc: rank_change / teamsCount,
+                        val: weights.espnRankChange * (rank_change / teamsCount),
+                        total: 20
+                    }
+                }
+
+                _.each(grades, o=>{
+                    score+=o.val;
+                });
+                teamModel.grades = grades;
+                teamModel.gradeScore = score;
+            });
+        }catch(ex){
+            console.log(ex);
+        }finally{
+            return model;
+        }
     }
 
     SplitBoxScores(boxScores){

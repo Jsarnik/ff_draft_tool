@@ -98,8 +98,8 @@ export function getLeagueDataFailure(error){
     return {type: types.GET_LEAGUE_DATA_FAILURE, error};
 }
 
-export function getLeagueData(_matchupPeriod){
-    let cookiesObj = readCookies(),
+export function getLeagueData(_matchupPeriod, cookies){
+    let cookiesObj = cookies || readCookies(),
     url = `${config.baseApiUri}/api/weeklyReportCard`,
     options = {
         leagueId: cookiesObj.leagueId,

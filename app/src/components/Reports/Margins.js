@@ -1,7 +1,46 @@
 import React from 'react';
 import * as _ from 'lodash';
-import { Table } from 'antd';
 import TeamLogo from '../TeamLogo';
+import { Table, Divider } from 'antd';
+import { WhiteSpace, Card} from 'antd-mobile';
+
+const MobileTable = (props) => {
+    return _.map(props.data, team => {
+        return (
+            <div>
+                <WhiteSpace size='sm'></WhiteSpace>
+                <Card key={team.key}>
+                    <Card.Header
+                        title={
+                                <div  style={{width:'100%'}}>
+                                    <div className="list-table-item left" style={{width:'80%'}}>Team</div>
+                                    <div className="list-table-item right" style={{width:'20%'}}>Pts</div>
+                                </div> 
+                                }
+                    />
+                    <Card.Body>
+                        <div style={{marginTop: 10}}>
+                            <div className="list-table-item left" style={{width:'80%'}}><div><TeamLogo size={20} src={team.team_logo} /><span>{team.team}</span></div></div>
+                            <div className="list-table-item right" style={{width:'20%'}}>{team.team_pts}</div>
+                        </div> 
+                        <div style={{marginTop: 10}}>
+                            <div className="list-table-item left" style={{width:'80%'}}><div><TeamLogo size={20} src={team.opp_logo} /><span>{team.opp}</span></div></div>
+                            <div className="list-table-item right" style={{width:'20%'}}>{team.opp_pts}</div>
+                        </div>
+                        <Divider></Divider>
+                        <div style={{marginTop: 10}}>
+                            <div className="list-table-item left" style={{width:'80%', fontWeight: "bold"}}>Margin</div>
+                            <div className="list-table-item right" style={{width:'20%'}}>
+                            <span style={parseFloat(team.margin) > 0 ?  {color: "#3f8600", fontWeight: "bold"} : parseFloat(team.margin) === 0 ? {} : {color: "#cf1322", fontWeight: "bold"}}>{team.margin.toFixed(2)}</span>
+                            </div>
+                        </div> 
+                    </Card.Body>
+                </Card>
+                <WhiteSpace size='sm'></WhiteSpace>
+            </div>
+        )
+    })
+}
 
 const columns = [
     {
@@ -53,7 +92,13 @@ function buildTableData(_data){
 const Margins = (props) =>{
     const data = buildTableData(props.data);
     return data ? (
-        <Table columns={columns} dataSource={data} bordered pagination={false}/>
+        <div>
+            {props.isMobile ?
+                <MobileTable data={data}></MobileTable>
+            :
+                <Table columns={columns} dataSource={data} bordered pagination={false}/>
+            }
+        </div>
     ) : null
 }
 

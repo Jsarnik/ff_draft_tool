@@ -1,7 +1,51 @@
 import React from 'react';
 import * as _ from 'lodash';
-import { Table, Icon } from 'antd';
 import TeamLogo from '../TeamLogo';
+import { Table, Icon, Divider } from 'antd';
+import { WhiteSpace, Card} from 'antd-mobile';
+
+const MobileTable = (props) => {
+    return _.map(props.data, team => {
+        return (
+            <div>
+                <WhiteSpace size='sm'></WhiteSpace>
+                <Card key={team.key}>
+                    <Card.Header
+                        title={
+                                <div  style={{width:'100%'}}>
+                                    <div className="list-table-item left" style={{width:'75%'}}><TeamLogo size={20} src={team.team_logo} /><span>{team.team}</span></div>
+                                    <div className="list-table-item right" style={{width:'25%'}}>Proj. Rank</div>
+                                </div> 
+                                }
+                    />
+                    <Card.Body>
+                        <div style={{marginTop: 10}}>
+                            <div className="list-table-item left" style={{width:'75%'}}>Rank Post Draft</div>
+                            <div className="list-table-item right" style={{width:'25%'}}>{team.rank_draft}</div>
+                        </div> 
+                        <div style={{marginTop: 10}}>
+                            <div className="list-table-item left" style={{width:'75%'}}>Current Rank</div>
+                            <div className="list-table-item right" style={{width:'25%'}}>{team.rank}</div>
+                        </div> 
+                        <Divider></Divider>
+                        <div style={{marginTop: 10}}>
+                            <div className="list-table-item left" style={{width:'75%', fontWeight: "bold"}}>Change</div>
+                            <div className="list-table-item right" style={{width:'25%'}}>
+                                <span style={{fontWeight: "bold", color: parseInt(team.change) > 0 ?  "#3f8600" : parseInt(team.change) === 0 ? "" : "#cf1322"}}>
+                                    <span>
+                                        <span> {parseInt(team.change) > 0 ? <Icon type="arrow-up" /> : parseInt(team.change) === 0 ? <Icon type="line" /> : <Icon type="arrow-down" />} </span>
+                                        <span>{Math.abs(parseInt(team.change)).toFixed(0)} </span>
+                                    </span>
+                                </span>
+                            </div>
+                        </div> 
+                    </Card.Body>
+                </Card>
+                <WhiteSpace size='sm'></WhiteSpace>
+            </div>
+        )
+    })
+}
 
 const columns = [
     {
@@ -49,7 +93,13 @@ function buildTableData(_data){
 const RankChange = (props) =>{
     const data = buildTableData(props.data);
     return data ? (
-        <Table columns={columns} dataSource={data} bordered pagination={false}/>
+        <div>
+            {props.isMobile ?
+                <MobileTable data={data}></MobileTable>
+            :
+            <Table columns={columns} dataSource={data} bordered pagination={false}/>
+            }
+        </div>
     ) : null
 }
 

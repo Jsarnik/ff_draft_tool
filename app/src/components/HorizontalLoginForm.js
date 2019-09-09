@@ -200,7 +200,7 @@ class HorizontalLoginForm extends Component {
 
     return (
       <div>
-        {_dropdown ? 
+         {_dropdown ? 
             <div>
               <label>Default Team: </label>
               <Select defaultValue={_defaultDropDown.label} style={{ width: 400, marginTop: 25 }} onChange={this.handleSelectChange}>

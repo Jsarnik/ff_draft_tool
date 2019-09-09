@@ -8,8 +8,10 @@ import PointsOnBench from './Reports//PointsOnBench';
 import Margins from './Reports/Margins';
 import RankChange from './Reports/RankChange';
 import PointsChange from './Reports/PointsChange';
+import WeeklyOverallGrade from './Reports/WeeklyOverallGrade';
 import * as _ from 'lodash';
-import { Tabs, Select, Card, Spin, Row, Col } from 'antd';
+import { MobileDropDown, MobileReport } from './Mobile/MobileReportCard';
+import { Tabs, Select, Card, Spin, Row, Col, Button } from 'antd';
 const { Option } = Select;
 const { TabPane } = Tabs;
 
@@ -17,7 +19,7 @@ const { TabPane } = Tabs;
 const PeriodDropDown = (props) =>{
   return (
     <div>
-      <Select defaultValue={`Week ${props.currentPeriod} (Current)`} style={{ width: 400 }} onChange={props.handleSelectPeriodChange}>
+      <Select defaultValue={`Week ${props.currentPeriod} (Current)`} style={{ width: '100%' }} onChange={props.handleSelectPeriodChange}>
         {
           _.map(props.totalPeriods, period => {
             let val = period[0];
@@ -95,19 +97,23 @@ class ReportCard extends Component {
         this.getLeagueData(period);
       }
     }
+
+    handleSnapShot = () => {
+      this.props.history.push(`/snapshot/${this.props.user.cookies.SWID}/${this.props.user.cookies.espnS2}/${this.props.user.cookies.leagueId}`);
+    }
     
     render() {
       const _dropdown = this.props.user && this.props.user.espnUser ? this.props.user.espnUser.leaguesModel : null;
       const _defaultDropDown = _dropdown ? _.find(this.props.user.espnUser.leaguesModel, {'value': parseInt(this.props.user.cookies.leagueId)}) || {} : null;
       const _defaultPeriod = this.props.espn.report ? this.props.espn.report.leagueInfo.status.currentMatchupPeriod : 1;
+      const _colSpan = this.props.isMobile ? 24 : 8;
 
       return this.props.espn.report ? (
           <div>
-
             <Row>
               {_dropdown ? 
-                <Col span={12}>
-                  <Select defaultValue={_defaultDropDown.label} style={{ width: 400 }} onChange={this.handleSelectChange}>
+                <Col span={_colSpan}>
+                  <Select defaultValue={_defaultDropDown.label} style={{ width: '100%' }} onChange={this.handleSelectChange}>
                     {
                       _.map(_dropdown, team => {
                         return (
@@ -118,34 +124,71 @@ class ReportCard extends Component {
                   </Select>
                 </Col>
               : null}
-              <Col span={12}>
-                <PeriodDropDown handleSelectPeriodChange={this.handleSelectPeriodChange} totalPeriods={this.props.espn.report.leagueInfo.settings.scheduleSettings.matchupPeriods} currentPeriod={_defaultPeriod}></PeriodDropDown>
-              </Col>
             </Row>
 
-            <Spin spinning={this.state.isloading}>
-              <div style={{textAlign: 'center', padding: 20}}>
-                <h1>{this.props.espn.report.leagueInfo.settings.name} - Week {_defaultPeriod} Matchups</h1>
+            <div style={{textAlign: 'center', padding: 20}}>
+              <h1>{this.props.espn.report.leagueInfo.settings.name} - Week {_defaultPeriod} Matchups</h1>
+            </div>
+
+          {
+            this.props.isMobile ?
+              <div>
+                  <Row style={{marginBottom: 20}}>
+                    <Col span={_colSpan}>
+                      <PeriodDropDown handleSelectPeriodChange={this.handleSelectPeriodChange} totalPeriods={this.props.espn.report.leagueInfo.settings.scheduleSettings.matchupPeriods} currentPeriod={_defaultPeriod}></PeriodDropDown>
+                    </Col>
+                  </Row>
+                  <Row style={{marginBottom: 20}}>
+                    <Col span={_colSpan}>
+                        <MobileDropDown handleReportChange={this.handleTabChange} selectedReport={this.props.match.params.type || 'weekly_grade'}></MobileDropDown>
+                    </Col>
+                  </Row>
+                  <Row style={{marginBottom: 20}}>
+                    <Col span={_colSpan}>
+                      <Button style={{width: '100%'}} type={'primary'} onClick={this.handleSnapShot}>Share with Credentials</Button>
+                    </Col>
+                </Row>
               </div>
-              <Card>
-                <Tabs defaultActiveKey={this.props.match.params.type || 'total_pts'} onChange={this.handleTabChange}>
-                  <TabPane tab="Total Points" key="total_pts">
-                    <TotalPoints data={this.props.espn.report.stats}></TotalPoints>
-                  </TabPane>
-                  <TabPane tab="Win/Loss Margin" key="margins">
-                    <Margins data={this.props.espn.report.stats}></Margins>
-                  </TabPane>
-                  <TabPane tab="Points Left On Bench" key="benched_pts">
-                    <PointsOnBench data={this.props.espn.report.stats}></PointsOnBench>
-                  </TabPane>
-                  <TabPane tab="Weekly Pts Diff" key="weekly_diff">
-                    <PointsChange data={this.props.espn.report.stats}></PointsChange>
-                  </TabPane>
-                  <TabPane tab="Proj Rank Change" key="rank_change">
-                    <RankChange data={this.props.espn.report.stats}></RankChange>
-                  </TabPane>
-                </Tabs>
-              </Card>
+            :
+              <Row style={{marginBottom: 20}}>
+                <Col span={_colSpan}>
+                  <PeriodDropDown handleSelectPeriodChange={this.handleSelectPeriodChange} totalPeriods={this.props.espn.report.leagueInfo.settings.scheduleSettings.matchupPeriods} currentPeriod={_defaultPeriod}></PeriodDropDown>
+                </Col>
+                <Col span={_colSpan}></Col>
+                <Col span={_colSpan}>
+                  <Button style={{width: '100%'}} type={'primary'} onClick={this.handleSnapShot}>Share with Credentials</Button>
+                </Col>
+
+              </Row>
+            }
+            <Spin spinning={this.state.isloading}>
+              {
+                this.props.isMobile ?
+                  <MobileReport data={this.props.espn.report.stats} selectedReport={this.props.match.params.type || 'weekly_grade'}></MobileReport>
+                :
+                  <Card>
+                    <Tabs defaultActiveKey={this.props.match.params.type || 'weekly_grade'} onChange={this.handleTabChange}>
+                      <TabPane tab="Weekly Grade" key="weekly_grade">
+                        <WeeklyOverallGrade data={this.props.espn.report.stats}></WeeklyOverallGrade>
+                      </TabPane>
+                      <TabPane tab="Total Points" key="total_pts">
+                        <TotalPoints data={this.props.espn.report.stats}></TotalPoints>
+                      </TabPane>
+                      <TabPane tab="Win/Loss Margin" key="margins">
+                        <Margins data={this.props.espn.report.stats}></Margins>
+                      </TabPane>
+                      <TabPane tab="Points Left On Bench" key="benched_pts">
+                        <PointsOnBench data={this.props.espn.report.stats}></PointsOnBench>
+                      </TabPane>
+                      <TabPane tab="Weekly Pts Diff" key="weekly_diff">
+                        <PointsChange data={this.props.espn.report.stats}></PointsChange>
+                      </TabPane>
+                      <TabPane tab="Proj Rank Change" key="rank_change">
+                        <RankChange data={this.props.espn.report.stats}></RankChange>
+                      </TabPane>
+                    </Tabs>
+                  </Card>
+              }
             </Spin>
         </div>
       ) : null
