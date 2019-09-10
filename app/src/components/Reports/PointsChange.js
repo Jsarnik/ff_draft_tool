@@ -1,7 +1,46 @@
 import React from 'react';
 import * as _ from 'lodash';
-import { Table, Icon, Empty } from 'antd';
 import TeamLogo from '../TeamLogo';
+import { Table, Icon, Empty, Divider } from 'antd';
+import {WhiteSpace, Card} from 'antd-mobile';
+
+const MobileTable = (props) => {
+    return _.map(props.data, team => {
+        return (
+            <div key={team.key}>
+                <WhiteSpace size='sm'></WhiteSpace>
+                <Card>
+                    <Card.Header
+                        title={
+                                <div  style={{width:'100%'}}>
+                                    <div className="list-table-item left" style={{width:'80%'}}><TeamLogo size={20} src={team.team_logo} /><span>{team.team}</span></div>
+                                    <div className="list-table-item right" style={{width:'20%'}}>Pts</div>
+                                </div> 
+                                }
+                    />
+                    <Card.Body>
+                        <div style={{marginTop: 10}}>
+                            <div className="list-table-item left" style={{width:'80%'}}><span>Previus Week</span></div>
+                            <div className="list-table-item right" style={{width:'20%'}}><span>{team.prev_pts}</span></div>
+                        </div> 
+                        <div style={{marginTop: 10}}>
+                            <div className="list-table-item left" style={{width:'80%'}}><span>Current Week</span></div>
+                            <div className="list-table-item right" style={{width:'20%'}}><span>{team.curr_pts}</span></div>
+                        </div> 
+                        <Divider></Divider>
+                        <div style={{marginTop: 10}}>
+                            <div className="list-table-item left" style={{width:'80%', fontWeight: "bold"}}>Change</div>
+                            <div className="list-table-item right" style={{width:'20%'}}>
+                            <span style={parseFloat(team.change) > 0 ?  {color: "#3f8600", fontWeight: "bold"} : parseFloat(team.change) === 0 ? {} : {color: "#cf1322", fontWeight: "bold"}}>{team.change.toFixed(2)}</span>
+                            </div>
+                        </div> 
+                    </Card.Body>
+                </Card>
+                <WhiteSpace size='sm'></WhiteSpace>
+            </div>
+        )
+    })
+}
 
 const columns = [
     {
@@ -51,7 +90,13 @@ function buildTableData(_data){
 const PointsChange = (props) =>{
     const data = props.data[Object.keys(props.data)[0]].previous ? buildTableData(props.data) : null;
     return data ? (
-        <Table columns={columns} dataSource={data} bordered pagination={false}/>
+        <div>
+            {props.isMobile ?
+                <MobileTable data={data}></MobileTable>
+            :
+                <Table columns={columns} dataSource={data} bordered pagination={false}/>
+            }
+        </div>
     ) : <Empty />
 }
 

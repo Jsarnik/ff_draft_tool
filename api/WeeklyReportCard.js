@@ -178,7 +178,7 @@ class WeeklyReportCardService{
             const total = _.orderBy(model, ['totalPts'],['desc']);
             const margin = _.orderBy(model, ['margin'],['desc']);
             const bench = _.orderBy(model, ['ptsLeftOnBench'],['asc']);
-            const change = 0;
+            const change = model[1].previous ? _.orderBy(model, [(o) => { return o.previous.diff}]) : null;
             const espnRank = _.orderBy(model, o =>{
                 return o.info.draftDayProjectedRank - o.info.currentProjectedRank;
             }, ['asc']);
@@ -195,7 +195,7 @@ class WeeklyReportCardService{
                 let total_pts = _.findIndex([...total].reverse(), o=>{ return o.id === teamModel.id}) + 1;
                 let margins = _.findIndex([...margin].reverse(), o=>{ return o.id === teamModel.id}) + 1;
                 let benched_pts = _.findIndex([...bench].reverse(), o=>{ return o.id === teamModel.id}) + 1;
-                let weekly_diff = 0;
+                let weekly_diff = change ? _.findIndex([...change].reverse(), o=>{ return o.id === teamModel.id}) + 1 : null;
                 let rank_change = _.findIndex([...espnRank].reverse(), o=>{ return o.id === teamModel.id}) + 1;
                 let score = 0;
                 let grades = {
@@ -225,10 +225,10 @@ class WeeklyReportCardService{
                     },
                     weekly_diff: {
                         name: 'Weekly Pts Change',
-                        rank: 1,
-                        multiplier: 0,
-                        perc: 100,
-                        val: 20,
+                        rank: _.findIndex(change, o=>{ return o.id === teamModel.id}) + 1,
+                        multiplier: weekly_diff || 0,
+                        perc: weekly_diff ? weekly_diff / teamsCount : 1,
+                        val: weekly_diff ? weights.change * (weekly_diff / teamsCount) : 20,
                         total: 20
                     },
                     rank_change: {

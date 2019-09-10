@@ -39,11 +39,11 @@ const MobileDropDown = (props) => {
       ];
 
       return (
-        <Select defaultValue={'Weekly Grade'} style={{ width: '100%', marginTop: 20 }} onChange={props.handleReportChange}>
+        <Select value={props.selectedReport || 'Weekly Grade'} style={{ width: '100%', marginTop: 20 }} onChange={props.handleReportChange}>
             {
             _.map(_mobileDropdown, report => {
                 return (
-                <Option key={report.value} value={report.value} disabled={report.value === props.selectedReport}>{report.label}</Option>
+                  <Option key={report.value} value={report.value} disabled={report.value === props.selectedReport}>{report.label}</Option>
                 )
             })
             }

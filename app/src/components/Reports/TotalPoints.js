@@ -2,7 +2,7 @@ import React from 'react';
 import * as _ from 'lodash';
 import { Table } from 'antd';
 import TeamLogo from '../TeamLogo';
-import { WhiteSpace, Card} from 'antd-mobile';
+import {Card} from 'antd-mobile';
 
 const MobileTable = (props) => {
         return (

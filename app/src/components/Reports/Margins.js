@@ -7,9 +7,9 @@ import { WhiteSpace, Card} from 'antd-mobile';
 const MobileTable = (props) => {
     return _.map(props.data, team => {
         return (
-            <div>
+            <div key={team.key}>
                 <WhiteSpace size='sm'></WhiteSpace>
-                <Card key={team.key}>
+                <Card>
                     <Card.Header
                         title={
                                 <div  style={{width:'100%'}}>

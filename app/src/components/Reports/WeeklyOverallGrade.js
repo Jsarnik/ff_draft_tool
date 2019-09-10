@@ -22,7 +22,7 @@ const MobileTable = (props) => {
                         {
                             _.map(team.breakdown, score => {
                                 return (
-                                    <div style={{marginTop: 10}}>
+                                    <div style={{marginTop: 10}} key={score.name}>
                                         <div className="list-table-item left" style={{width:'80%'}}>
                                             <div>
                                                 <span>{score.name}:</span>
@@ -65,7 +65,7 @@ const columns = [
         render: text =>  {
             return _.map(text, score => {
                 return (
-                    <div>
+                    <div key={score.name}>
                         <span>{score.name}: (rank {score.rank}) - ({score.perc * 100}% X {score.total}) = {score.val}</span>
                     </div>
                 )
@@ -96,7 +96,6 @@ function buildTableData(_data){
 
 const WeeklyOverallGrade = (props) =>{
     const data = props.data ? buildTableData(props.data) : null;
-    console.log(data)
     return data ? (
         <div>
         {props.isMobile ?

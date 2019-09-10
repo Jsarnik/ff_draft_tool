@@ -15,11 +15,10 @@ import { Tabs, Select, Card, Spin, Row, Col, Button } from 'antd';
 const { Option } = Select;
 const { TabPane } = Tabs;
 
-
 const PeriodDropDown = (props) =>{
   return (
     <div>
-      <Select defaultValue={`Week ${props.currentPeriod} (Current)`} style={{ width: '100%' }} onChange={props.handleSelectPeriodChange}>
+      <Select value={`Week ${props.selectedPeriod} ${props.selectedPeriod === props.currentPeriod ? '(Current)' : '(Ended)'}`} style={{ width: '100%' }} onChange={props.handleSelectPeriodChange}>
         {
           _.map(props.totalPeriods, period => {
             let val = period[0];
@@ -105,7 +104,7 @@ class ReportCard extends Component {
     render() {
       const _dropdown = this.props.user && this.props.user.espnUser ? this.props.user.espnUser.leaguesModel : null;
       const _defaultDropDown = _dropdown ? _.find(this.props.user.espnUser.leaguesModel, {'value': parseInt(this.props.user.cookies.leagueId)}) || {} : null;
-      const _defaultPeriod = this.props.espn.report ? this.props.espn.report.leagueInfo.status.currentMatchupPeriod : 1;
+      const _currentMatchupPeriod = this.props.espn.report ? this.props.espn.report.leagueInfo.status.currentMatchupPeriod : 1;
       const _colSpan = this.props.isMobile ? 24 : 8;
 
       return this.props.espn.report ? (
@@ -113,7 +112,7 @@ class ReportCard extends Component {
             <Row>
               {_dropdown ? 
                 <Col span={_colSpan}>
-                  <Select defaultValue={_defaultDropDown.label} style={{ width: '100%' }} onChange={this.handleSelectChange}>
+                  <Select value={_defaultDropDown.label} style={{ width: '100%' }} onChange={this.handleSelectChange}>
                     {
                       _.map(_dropdown, team => {
                         return (
@@ -127,7 +126,7 @@ class ReportCard extends Component {
             </Row>
 
             <div style={{textAlign: 'center', padding: 20}}>
-              <h1>{this.props.espn.report.leagueInfo.settings.name} - Week {_defaultPeriod} Matchups</h1>
+              <h1>{this.props.espn.report.leagueInfo.settings.name} - Week {this.state.viewingCurrentMatchupPeriod} Matchups</h1>
             </div>
 
           {
@@ -135,7 +134,12 @@ class ReportCard extends Component {
               <div>
                   <Row style={{marginBottom: 20}}>
                     <Col span={_colSpan}>
-                      <PeriodDropDown handleSelectPeriodChange={this.handleSelectPeriodChange} totalPeriods={this.props.espn.report.leagueInfo.settings.scheduleSettings.matchupPeriods} currentPeriod={_defaultPeriod}></PeriodDropDown>
+                      <PeriodDropDown 
+                        handleSelectPeriodChange={this.handleSelectPeriodChange} 
+                        totalPeriods={this.props.espn.report.leagueInfo.settings.scheduleSettings.matchupPeriods} 
+                        currentPeriod={_currentMatchupPeriod}
+                        selectedPeriod={this.state.viewingCurrentMatchupPeriod}>
+                      </PeriodDropDown>
                     </Col>
                   </Row>
                   <Row style={{marginBottom: 20}}>
@@ -152,7 +156,12 @@ class ReportCard extends Component {
             :
               <Row style={{marginBottom: 20}}>
                 <Col span={_colSpan}>
-                  <PeriodDropDown handleSelectPeriodChange={this.handleSelectPeriodChange} totalPeriods={this.props.espn.report.leagueInfo.settings.scheduleSettings.matchupPeriods} currentPeriod={_defaultPeriod}></PeriodDropDown>
+                <PeriodDropDown 
+                  handleSelectPeriodChange={this.handleSelectPeriodChange} 
+                  totalPeriods={this.props.espn.report.leagueInfo.settings.scheduleSettings.matchupPeriods} 
+                  currentPeriod={_currentMatchupPeriod}
+                  selectedPeriod={this.state.viewingCurrentMatchupPeriod}>
+                </PeriodDropDown>
                 </Col>
                 <Col span={_colSpan}></Col>
                 <Col span={_colSpan}>
