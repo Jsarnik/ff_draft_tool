@@ -19,7 +19,7 @@
     "ejs": "^2.4.1",
     "espn-fantasy-football-api": "^0.10.1",
     "excel4node": "^1.6.0",
-    "express": "^4.16.2",
+    "express": "^4.17.3",
     "express-session": "^1.13.0",
     "fast-csv": "^2.4.1",
     "handlebars": "^4.0.11",
